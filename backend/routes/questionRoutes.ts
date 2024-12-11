@@ -1,15 +1,17 @@
-import express from 'express';
+import express, {  Router } from 'express';
 import { 
   saveQuestion, 
   respondToQuestion, 
   getQuestions,
   editQuestion,
   deleteQuestion,
-  editResponse,
-  deleteResponse
+  //editResponse,
+  //deleteResponse
 } from '../controllers/questionController';
+import { m } from 'framer-motion';
+import mongoose from 'mongoose';
 
-const router = express.Router();
+const router: Router = express.Router();
 
 //Ruta para manejar las preguntas
 router.post('/', saveQuestion);
@@ -31,30 +33,40 @@ router.get('/', async (req, res) => {
 //Ruta para editar una pregunta
 router.put('/:id', async (req, res) => {
     const { id } = req.params;
-    const { content } = req.body;
+    const { question } = req.body;
 
     try {    
-      const updatedQuestion = await editQuestion(id, content);
+      const updatedQuestion = await editQuestion(id, question);
       res.status(200).json(updatedQuestion);
   } catch (error) {
+    console.error('Error al editar la pregunta:', error);
     res.status(500).json({ error: 'Error al eliminar la pregunta' });
   }
 });
 
 //Ruta para eliminar una pregunta
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req, res): Promise<void> => {
  const { id } = req.params;
  
      try {
+      //Valida si el id tiene el formato correcto
+       if (!mongoose.Types.ObjectId.isValid(id)) {
+         res.status(400).json({ message: 'Id inválido' });
+       return;
+} 
+      //Llama al controlador para eliminar la pregunta
        await deleteQuestion(id);
-       res.status(200).json({ messsage: 'Pregunta eliminada correctamente'});
-        } catch (error) {
-          res.status(500).json({ message: 'Error al eliminar la pregunta' });  
-  }
-});
+
+       //responder con exito
+       res.status(200).json({ message: 'Pregunta eliminada correctamente' });
+     } catch (error) {
+       console.error('Error al eliminar la pregunta:', error);
+       res.status(500).json({ message: 'Error al eliminar la pregunta' });
+     }
+   });
 
 //Ruta para editar una respuesta
-router.put('/:id/responses/:responseId', async (req, res) => {
+{/*router.put('/:id/responses/:responseId', async (req, res) => {
   const { id, responseId } = req.params;
   const { content } = req.body;
   
@@ -77,6 +89,6 @@ router.delete('/:id/responses/:responseId', async (req, res) => {
     console.error('Error al eliminar la respuesta:', error);
     res.status(500).json({ message: 'Error al eliminar la respuesta' });  
   }
-});
+});*/}
 
 export default router;

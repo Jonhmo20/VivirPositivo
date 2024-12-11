@@ -128,7 +128,9 @@ const QASection: React.FC = () => {
     if (!newResponse.trim()) return; //evita respuesta vacias
     
     try { 
-      const response = await axios.post(`http://localhost:5000/api/questions/${questionId}/responses`, { 
+      const response = await axios.post(
+        `http://localhost:5000/api/questions/${questionId}/responses`, 
+        { 
         content: newResponse, 
         isPsychologist: true, 
         authorName: 'Admin',
@@ -136,16 +138,33 @@ const QASection: React.FC = () => {
     ); 
       
       if (response.status === 200) { 
-        const updatedQuestions = questions.map((q) => 
-          q.id === questionId 
-        ? { ...q, responses: [...q.responses, response.data] } // Agrega la nueva respuesta a las existentes
-         : q
-      ); 
-        setQuestions(updatedQuestions); 
+        console.log('Respuesta recibida correctamente:', response.data);
 
+        //Actualiza loaclmente el estado de las preguntas
+        setQuestions((prevQuestions) => 
+          prevQuestions.map((q) =>  
+            q.id === questionId 
+              ? { 
+                ...q, 
+                isAnswered: true, //Marca la pregunta como respondida
+                responses: [
+                  ...(q.responses || []), //Asegura que responses no sea undefined
+                  {
+                    content: newResponse,
+                    isPsychologist: true,
+                    authorName: 'Admin',
+                    createdAt: new Date(),//Opcional:  Ajusta la fecha de creación
+                  },
+                ],
+              } 
+              : q
+          )
+         );
+
+         //Limpia el campo de texto respuesta despues de enviar
         setResponseInputs((prev) => ({
           ...prev,
-        [questionId]: '', 
+        [questionId]: '', //Limpia el campo de texto despues de enviar
         }));
 
         alert('Respuesta enviada y guardada correctamente.'); 
@@ -333,7 +352,7 @@ const QASection: React.FC = () => {
                 </span>
               </div>
               
-              {/**/}
+              
               {/* Logica de Texto o Formulario de Edicion */}
               {editingQuestionId === q.id ? (
                 <form
