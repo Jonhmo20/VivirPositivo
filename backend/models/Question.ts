@@ -1,6 +1,7 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema, Types } from 'mongoose';
 
 export interface IResponse {
+  _id?: mongoose.Types.ObjectId; // Usar el tipo de ID de mongoose
   content: string;
   createdAt: Date;
   isPsychologist: boolean;
@@ -16,8 +17,16 @@ export interface IQuestion extends Document {
   category: string;
   createdAt: Date;
   isAnswered: boolean;
-  responses: IResponse[];
+  responses: Types.DocumentArray<IResponse>;
 }
+
+// Define el esquema para respuestas
+const responseSchema = new Schema<IResponse>({
+  content: { type: String },
+  createdAt: { type: Date, default: Date.now },
+  isPsychologist: { type: Boolean },
+  authorName: { type: String },
+});
 
 // Definición del esquema de mongoose
 const questionSchema = new Schema<IQuestion>({
@@ -27,14 +36,7 @@ const questionSchema = new Schema<IQuestion>({
   category: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
   isAnswered: { type: Boolean, default: false },
-  responses: [
-    { 
-      content: {type: String }, 
-      createdAt: { type: Date, default: Date.now }, 
-      isPsychologist: {type: Boolean }, 
-      authorName: { type: String },
-    },
-  ],
+  responses: [responseSchema],// Usar el esquema de respuesta aquí
 });
 
 //Modelo de mongoose

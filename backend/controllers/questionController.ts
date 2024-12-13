@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Question, { IQuestion } from '../models/Question';
+import mongoose, { Types } from 'mongoose';
 //import { sendEmail } from '../services/emailService';
 
 export const saveQuestion = async (req: Request, res: Response): Promise<void> => {
@@ -110,28 +111,33 @@ export const deleteQuestion = async (id: string): Promise<void> => {
 };
 
     // Editar una respuesta
-    /*export const editResponse = async (id: string, responseId: string, content: string): Promise<any> => {
+    export const editResponse = async (id: string, responseId: string, content: string): Promise<any> => {
       const question = await Question.findById(id);
       if (!question) throw new Error('Pregunta no encontrada');
+
+      //Convierte el responseId a un objectId y encuentra la respuesta
+      const objectId = new Types.ObjectId(responseId);
+      const response = question.responses.id(objectId);
     
-      const response = question.responses.id(responseId);
       if (!response) throw new Error('Respuesta no encontrada');
     
-      response.content = content;
-      await question.save();
-      return response;
+      response.content = content;// Actualiza el contenido de la respuesta
+      await question.save();// Guarda los cambios en la base de datos
+
+     
+      return { ...response.toObject(), _id: response._id?.toString() };//Devuelve la respuesta actualizada
     };
 
 // Eliminar una respuesta
-/*export const deleteResponse = async (id: string, responseId: string): Promise<void> => {
+export const deleteResponse = async (id: string, responseId: string): Promise<void> => {
   const question = await Question.findById(id);
   if (!question) throw new Error('Pregunta no encontrada');
 
   const responseIndex = question.responses.findIndex(
-    (response) => response._id.toString() === responseId
+    (response) => response._id?.toString() === responseId
   );
   if (responseIndex === -1) throw new Error('Respuesta no encontrada');
 
   question.responses.splice(responseIndex, 1);
   await question.save();
-  */
+};

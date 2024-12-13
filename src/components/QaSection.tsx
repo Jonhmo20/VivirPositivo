@@ -16,8 +16,7 @@ interface Question {
 }
 
 interface Response {
-  _id?: { $oid: string } | string;
-  id?: string;
+  _id?: string;
   content: string;
   createdAt: Date;
   isPsychologist: boolean;
@@ -215,15 +214,16 @@ const QASection: React.FC = () => {
 
   const handleEditResponse = async (questionId: string, responseId: string, updatedContent: string) => {
     try {
-      const response = await axios.put(`http://localhost:5000/api/questions/${questionId}/responses/${responseId}`, {
-        content: updatedContent
-      });
+      const response = await axios.put(
+        `http://localhost:5000/api/questions/${questionId}/responses/${responseId}`, 
+        {content: updatedContent}
+      );
 
       if (response.status === 200) {
-        const updatedQuestions = questions.map(q => {
+        const updatedQuestions = questions.map((q) => {
           if (q.id === questionId) {
-            const updatedResponses = q.responses.map(r => 
-              r.id === responseId ? {...r, content: updatedContent} : r
+            const updatedResponses = q.responses.map((r) => 
+              r._id === responseId ? {...r, content: updatedContent} : r
             );
             return {...q, responses: updatedResponses};
           }
@@ -232,6 +232,7 @@ const QASection: React.FC = () => {
         
         setQuestions(updatedQuestions);
         setEditingResponseId(null);
+        setUpdatedResponseContent(""); // Limpia el campo de texto despues de guardar
         alert('Respuesta actualizada correctamente');
       }
     } catch (error) {
@@ -247,7 +248,7 @@ const QASection: React.FC = () => {
       if (response.status === 200) {
         const updatedQuestions = questions.map(q => {
           if (q.id === questionId) {
-            const updatedResponses = q.responses.filter(r => r.id !== responseId);
+            const updatedResponses = q.responses.filter(r => r. _id !== responseId);
             return {...q, responses: updatedResponses};
           }
           return q;
@@ -373,6 +374,13 @@ const QASection: React.FC = () => {
                   >
                     Guardar
                   </button>
+                  <button
+                      type="button"
+                      className="mt-2 ml-2 px-4 py-2 rounded-md bg-gray-500 text-white hover:bg-gray-600 transition-colors"
+                      onClick={() => setEditingQuestionId(null)} // Cancelar edición
+                    >
+                      Cancelar
+                    </button>
                   </form>
               ) : (
                 <p className="text-gray-800 mb-6">{q.question}</p>
@@ -411,11 +419,11 @@ const QASection: React.FC = () => {
           <ul className="space-y-4 mt-4">
             {q.responses.map((r) => (
               <li
-                key={r.id}
+                key={r. _id}
                 className="bg-gray-50 p-4 rounded-lg shadow-md border-l-4 border-[#B7DBC8] "
               >
                 {/* Logica de edicion o visualizacion */}
-                {editingResponseId === r.id ? (
+                {editingResponseId === r._id ? (
                   <form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -423,7 +431,7 @@ const QASection: React.FC = () => {
                       "Estas seguro de que deseas guardar los cambios?"
                     );
                     if (confirmEdit) {
-                      handleEditResponse(q.id!, r.id!, updatedResponseContent);
+                      handleEditResponse(q.id!, r._id!, updatedResponseContent);
                     }
                   }}
                   >
@@ -439,6 +447,13 @@ const QASection: React.FC = () => {
                     >
                       Guardar 
                     </button>
+                    <button
+                      type="button"
+                      className="mt-2 ml-2 px-4 py-2 rounded-md bg-gray-500 text-white hover:bg-gray-600 transition-colors"
+                      onClick={() => setEditingResponseId(null)} // Cancelar edición
+                    >
+                      Cancelar
+                    </button>
                     </form>
                 ) : (
                   <div className='flex justify-between items-center'>
@@ -450,7 +465,7 @@ const QASection: React.FC = () => {
                     <button
                       className="px-3 py-2 text-sm rounded-md bg-[#285D66] text-white hover:bg-[#6DA095] transition-colors"
                       onClick={() => {
-                        setEditingResponseId(r.id!)
+                        setEditingResponseId(r._id!)
                         setUpdatedResponseContent(r.content);
                       }}
                     >
@@ -463,7 +478,7 @@ const QASection: React.FC = () => {
                           "Estas seguro de que deseas eliminar esta respuesta?"
                         );
                         if (confirmDelet) {
-                        handleDeleteResponse(q.id!, r.id!);
+                        handleDeleteResponse(q. id!, r._id!);
                       }
                     }}
                     >

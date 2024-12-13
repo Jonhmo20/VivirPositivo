@@ -57,13 +57,13 @@ const handleLogout = () => {
         borderBottom: `3px solid ${colors.highlight}`
       }}
     >
-
+      
       {/* Logo Section */}
       <div className="flex items-center cursor-pointer" onClick={handleLogoClick}>
         <img 
           src="/logo.jpeg" 
           alt="Logo" 
-          className="h-24 w-40 object-cover rounded-lg shadow-md transform transition-transform duration-300 hover:scale-110"
+          className="h-24 w-40 object-cover rounded-lg shadow-sm md:shadow-md lg:shadow-lg hover:shadow-xl transform transition-transform duration-300 hover:scale-110"
           style={{
             maxWidth: '250px', // Límite de ancho máximo
             borderRadius: '8px', // Bordes redondeados más pronunciados
