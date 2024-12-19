@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import Question, { IQuestion } from '../models/Question';
 import mongoose, { Types } from 'mongoose';
-//import { sendEmail } from '../services/emailService';
+import { sendEmail } from '../services/emailService';
 
 export const saveQuestion = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -15,6 +15,14 @@ export const saveQuestion = async (req: Request, res: Response): Promise<void> =
 
     const newQuestion = new Question({ name, email, question, category, createdAt: new Date(), isAnswered: false });
     const savedQuestion = await newQuestion.save();
+
+    // Enviar correo electrónico
+    await sendEmail(
+      process.env.ADMIN_EMAIL!,
+      `Nueva pregunta enviada por ${name}`,
+     `Una nueva pregunta ha sido registrada.\n\nUsuario: ${name}\nEmail: ${email}\nCategoría: ${category}\nPregunta: ${question}`
+      );
+
     res.status(201).json(savedQuestion);
   } catch (error) {
     console.error('Error al guardar la pregunta:', error);
@@ -56,6 +64,13 @@ export const respondToQuestion = async (req: Request, res: Response): Promise<vo
     question.isAnswered = true;
 
     await question.save();
+
+    // Enviar correo electrónico al autor
+    await sendEmail(
+      question.email,//Dirección del autor
+      'Tu pregunta ha sido respondida',
+       `Tu pregunta "${question.question}" ha recibido una respuesta\n\nRespuesta: ${content}`
+        );
     
     //Envia la pregunta actualizada 
     res.status(200).json({ message: 'Respuesta registrada correctamente' });
@@ -64,22 +79,6 @@ export const respondToQuestion = async (req: Request, res: Response): Promise<vo
     res.status(500).json({ error: 'Error al responder la pregunta' });
   }
 };
-  
-
-    // Enviar correo al usuario
-    /*await sendEmail({
-      to: question.email,
-      subject: 'Tu pregunta ha sido respondida',
-      text: `Tu pregunta "${question.question}" ha sido respondida: ${content}`
-    });
-
-  } catch (emailError) {
-    console.error('Error al enviar el correo:', emailError);
-    res.status(500).json({ error: 'Error al enviar el correo de respuesta' });
-    return;
-  }
-
-};*/
 
 // Editar una pregunta
 export const editQuestion = async (id: string, content: string): Promise<IQuestion | null> => {

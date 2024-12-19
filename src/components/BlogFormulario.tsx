@@ -165,66 +165,79 @@ const BlogFormulario: React.FC<BlogFormularioProps> = ({addBlog}) => {
     
 
     return (
-        <div className="container mx-auto my-10">
+        <div className="min-h-screen bg-neutral p-4 md:p-6 lg:p-8">
+            {/* Contenedor principal con fondo y padding responsivo */}
+            <div className="max-w-7xl mx-auto">
+                <div className="flex flex-col lg:flex-row gap-8">
+                    {/* Formulario de publicación */}
+                    <div className="w-full lg:w-1/2">
+                        <div className="bg-white rounded-xl shadow-md transitio-shadow hover:shadow-lg p-6 md:p-8">
+                            {/* Encabezado del formulario */}
+                            <h1 className="text-3xl font-bold text-prymary mb-8 transition-colors">
+                                {id ? "Editar Publicación" : "Crear Publicación"} 
+                            </h1>
 
-        <div className="flex flex-wrap lg:flex-nowrap gap-8">
-
-        <div className="w-full lg:w-1/2 bg-white shadow-lg rounded-lg p-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-6">
-            {id ? "Editar Publicación" : "Crear Publicación"} 
-            </h1>
             <form onSubmit={handlesumit} className="space-y-6">
             {/* Selección del tipo de publicación */}
-            <div>
-                <label className="block text-gray-600 text-sm font-semibold mb-2">
+            <div className="form-group">
+                <label className="block text-secondary font-medium mb-2">
                     Tipo de Publicación:
                 </label>
                 <select 
-                    className="block w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500"
+                    className="w-full p-3 rounded-lg border-2 border-accent focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 bg-white"
                     value={postType} 
                     onChange={(e) => setPostType(e.target.value as "text" | "video")}
                 >
-                    <option value= "text">Texto</option>
-                    <option value= "video">Video</option>               
+                    <option value= "text">Articulo de texto</option>
+                    <option value= "video">Contenido en video</option>
                 </select>
             </div>
 
             {/*campo del titulo*/}
-            <div>
-                <label className="block text-gray-600 text-sm font-semibold mb-2">Titulo:</label>
+            <div className="form-group">
+                <label className="block text-secondary font-medium mb-2">
+                    Titulo
+                </label>
                 <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-                autoComplete="off"
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full p-3 rounded-lg border-2 border-accent focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                    required
                 />
             </div>
 
             {/* Campo de imagen para publicacion de texto*/}
             {postType === "text" && (
-                <>
-                <div>
-                    <label>Subir Imagen (Formatos admitidos: JPG, PNG, GIF):</label>
+                < div className="form-group">
+                    <label className="block text-secondary font-medium mb-2">
+                        Imagen Principal
+                    </label>
+                    < div className="relativ">
                     <input
                     type="file"
                     accept=".jpg, .png, .gif" //formatos permitidos
                     onChange={handleImageUpload}
+                    className="w-full p-3 rounded-lg border-2 border-accent file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-primary file:text-white hover:file:bg-primary-hover transition-all duration-200"
                     />
                 </div>
-                </>
+                <p className="text-sm text-gray-500 mt-1">
+                    Formatos admitidos: JPG, PNG, GIF
+                </p>
+                </div>
             )}
 
-            {/*Campos especificos para la publicacion de texto*/}
+            {/*Editor de texto para la publicación de texto*/}
             {postType === "text" || postType === "video" ? (
-                <>
-                    <div>
-                        <label>Descripción:</label>
+                <div className="form-group">
+                        <label className="block text-secondary font-medium mb-2">
+                            Contenido
+                        </label>
+                        <div className="border-2 border-accent rounded-lg overflow-hidden">
                         <ReactQuill
                         value={description}
                         onChange={setDescription}
-                        className="border border-gray-300 rounded-lg"
+                        className="bg-white"
                         modules={{
                             toolbar: [
                                 [{ header: [1, 2, false] }],
@@ -234,58 +247,79 @@ const BlogFormulario: React.FC<BlogFormularioProps> = ({addBlog}) => {
                             ],
                         }}
                         formats={['bold', 'italic', 'underline', 'header', 'image', 'code-block']}
-                        placeholder="Escribe aquí..."
-                    /></div>
-                
-                {postType === "text" && (
-                    <div>
-                        <label>Autor:</label>
-                        <input
-                            type="text"
-                            value={author}
-                            onChange={(e) => setAuthor(e.target.value)}
-                            required
-                            className="w-full p-3 border border-gray-300 rounded-lg"
+                        placeholder="Comparte tu conocimiento aquí..."
+                    />
+                    </div>
+                    </div>
+            ): null }
+
+            {/*Campos especificos segun el tipo de publicación*/}
+            {postType === "text" && (
+                <div className="form-group">
+                    <label className="block text-secondary font-medium mb-2">
+                        Autor
+                    </label>
+                    <input
+                        type="text"
+                        value={author}
+                        onChange={(e) => setAuthor(e.target.value)}
+                        required
+                        className="w-full p-3 rounded-lg border-2 border-accent focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                        placeholder="Nombre del autor"
                         />
                     </div>
                 )}
-                </>
-            ): null }
 
             {/*Campo de URL para la publicación de video */}
             {postType === "video" && (
-                <div>
-                     <label>URL del Video:</label>
+                <div  className="form-group">
+                     <label className="block text-secondary font-medium mb-2">
+                        URL del Video
+                     </label>
                       <input  
                             type="url"
                             value={videoUrl}
                             onChange={(e) => setVideoUrl(e.target.value)}
                             required
-                            className="w-full p-3 border border-gray-300 rounded-lg"
+                            className="w-full p-3 rounded-lg border-2 border-accent focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                            placeholder="Enlace de YouTube o TikTok"
                        /> 
+                       <p className="text-sm text-gray-500 mt-1">
+                        Soporta enlaces de YouTube o TikTok
+                       </p>
                 </div>
             )}
 
             <button 
-            type="submit"
-            className="w-full p-3 bg-CIELO-light text-white rounded-lg hover:bg-CIELO-dark">
-            {id ? "Guardar Cambios" : "Crear Publicación"}</button>
+                type="submit"
+                className="w-full bg-primary text-white font-medium py-3 px-6 rounded-lg hover:bg-primary-hover focus:ring-4 focus:ring-primary/30 transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+            >
+                {id ? "Guardar Cambios" : "Crear Publicación"}
+                </button>
             </form>
+            </div>
             </div>
 
             {/*Vista previa de la publicación*/}
-            <div className="w-full lg:w-1/2 bg-cerceta-light p-8 rounded-lg shadow-lg">
-            <h2 className="text-2xl font-bold mb-4">Vista Previa:</h2>
-            <Blogcard
-                blogId={id ? parseInt(id) : Date.now()}
-                title={title}
-                description={description}
-                image={imageURL}
-                videoUrl={videoUrl}
-                author={author}
-                type={postType}
-                
-                />
+            <div className="w-full lg:w-1/2">
+                <div className="bg-accent/30 rounded-xl shadow-md p-6 md:p-8 sticky top-8">
+                    <h2 className="text-2xl font-bold text-secondary mb-6">
+                        Vista Previa
+                    </h2>
+                    <div className="bg-white rounded-lg shadow-sm p-4"> <Blogcard
+                        blogId={id ? parseInt(id) : Date.now()}
+                        title={title}
+                        description={description}
+                        image={imageURL}
+                        videoUrl={videoUrl}
+                        author={author}
+                        type={postType}
+                        
+                        />
+           
+                    </div>
+                    </div>
+                    </div>
             </div>
            </div> 
         </div>

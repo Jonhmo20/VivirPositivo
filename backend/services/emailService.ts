@@ -1,33 +1,33 @@
 // backend/services/emailService.ts
 import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
 
-// Configuración del transportador de nodemailer
+dotenv.config();
+
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // O el servicio que uses, como SendGrid, Mailgun, etc.
+  host: process.env.EMAIL_SERVICE,
+  port: Number(process.env.EMAIL_PORT),
+  secure: false,// cambia a true si usas puerto 465
   auth: {
-    user: process.env.EMAIL_USER, // Define tu usuario de correo en variables de entorno
-    pass: process.env.EMAIL_PASS, // Define tu contraseña de correo en variables de entorno
-  },
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
 });
 
-interface EmailOptions {
-  to: string;
-  subject: string;
-  text: string;
-}
-
-export async function sendEmail({ to, subject, text }: EmailOptions) {
+export const sendEmail = async (to: string, subject: string, text: string, html?: string) => {
   try {
-    const info = await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to,
-      subject,
-      text,
-    });
-    console.log('Correo enviado: ', info.messageId);
-    return { success: true };
-  } catch (error) {
-    console.error('Error al enviar el correo:', error);
-    return { success: false, error };
-  }
-}
+    const mailOptions = {
+      from: process.env.ADMIN_EMAIL,//direccion del correo remitente
+      to,//destinatario
+      subject,//asunto del correo
+      text,//texto del correo
+      html//html del correo opcional
+    };
+      
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`Email enviado con éxito: ${info.messageId}`);
+    } catch (error) {
+      console.error('Error al enviar el correo:', error);
+    throw new Error('Error al enviar el correo');
+    }
+    };

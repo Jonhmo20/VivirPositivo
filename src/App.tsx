@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import BlogFormulario from './components/BlogFormulario';
 import LoginForm from './components/LoginForm';
@@ -43,28 +43,26 @@ function AppContent({
   agregarBlog: (blog: Blog) => void 
 }) {
   const { user } = useAuth();
+  const navigate = useNavigate();// Usa useNavigate para la navegación
 
   return (
     <>
       <Header 
         isAdmin={user?.rol === 'admin'} 
         onNavigate={(route) => {
-          // Navegación usando window.location
+          // Navegación usando useNavigate
           switch(route) {
             case 'home':
-              window.location.href = '/';
-              break;
-            case 'blogs':
-              window.location.href = '/';
+              navigate('/');//ruta de inicio
               break;
             case 'preguntas':
-              window.location.href = '/QAsection';
+              navigate('/QAsection');//ruta de preguntas y respuestas
               break;
             case 'admin-blogs':
-              window.location.href = '/create-blog';
+             navigate('/create-blog');//ruta de crear blog
               break;
             default:
-              window.location.href = '/';
+              navigate('/');//ruta por defecto
           }
         }} 
       />
@@ -78,6 +76,7 @@ function AppContent({
             <BlogFormulario addBlog={agregarBlog} />
           </PrivateRoute>   
         }/>   
+        <Route path='*' element={<h1>404 - Página no encontrada</h1>} />
       </Routes>
     </>
   );
