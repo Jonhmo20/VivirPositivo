@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from './components/AuthContext';
 import BlogPage from './components/BlogPage';
 import QASection from './components/QaSection';
 import Header from './components/Header';
+import ErrorBoundary from './components/ErrorBoundary';
 
 interface Blog {
   id: number;
@@ -28,7 +29,9 @@ function App() {
   return (
     <Router>
       <AuthProvider>
+        <ErrorBoundary >
         <AppContent blogs={blogs} agregarBlog={agregarBlog} />
+      </ErrorBoundary>
       </AuthProvider>
     </Router>
   );
@@ -76,6 +79,14 @@ function AppContent({
             <BlogFormulario addBlog={agregarBlog} />
           </PrivateRoute>   
         }/>   
+        <Route 
+        path="/edit-blog/:id"
+         element={
+          <PrivateRoute> 
+            <BlogFormulario />
+          </PrivateRoute>   
+         }
+        />
         <Route path='*' element={<h1>404 - Página no encontrada</h1>} />
       </Routes>
     </>

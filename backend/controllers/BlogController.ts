@@ -20,7 +20,7 @@ export const updateBlog = async (req: Request, res: Response): Promise<Response>
         return res.json(blog);
     } catch (error) {
         return res.status(500).json({ message: 'Error al actualizar el blog', error});
-    }
+    }  
 };
 
 //Eliminar blog

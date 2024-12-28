@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Blogs from "./Blogs";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import BlogFormulario from "./BlogFormulario";
 
 
@@ -14,17 +15,26 @@ interface BlogPost {
     type: "text" | "video";
 }
 
-const BlogPage: React.FC = () => {
-    const [blogs, setBlogs] = useState<BlogPost[]>([]); // Estado de blogs
+interface BlogPageProps {
+  blogs: BlogPost[];
+  addBlog: (blog: BlogPost) => void;
+}
+
+
+const BlogPage: React.FC<BlogPageProps> = ({ addBlog }) => {
+    const [localBlogs, setLocalBlogs] = useState<BlogPost[]>([]); // Estado de blogs
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const navigate = useNavigate();
   
     useEffect(() => {
       const fetchBlogs = async () => {
         try {
           const response = await axios.get("http://localhost:5000/api/blogs");
-          setBlogs(response.data);
+          console.log("Blogs cargados:", response.data); 
+          setLocalBlogs(response.data);
         } catch (err) {
+          console.error("Error al cargar los blogs:", err);
           setError("Error en la solicitud");
         } finally {
           setLoading(false);
@@ -32,19 +42,15 @@ const BlogPage: React.FC = () => {
       };
   
       fetchBlogs();
-    }, []);
-  
-    const agregarBlog = (nuevoBlog: BlogPost) => {
-        setBlogs((prevBlogs) => [nuevoBlog, ...prevBlogs]); // Agrega el nuevo blog al inicio de la lista
-    };
-  
+    }, [addBlog]);
+
     if (loading) return <p>Loading...</p>;
     if (error) return <p>{error}</p>;
   
     return (
         <div>
         {/* Renderiza la lista de blogs */}
-        <Blogs blogs={blogs} />
+        <Blogs blogs={localBlogs} />
       </div>
     );
   };

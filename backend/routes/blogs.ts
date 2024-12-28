@@ -4,7 +4,7 @@ import * as BlogController from '../controllers/BlogController';
 
 const router: Router = express.Router();
 
-// GET route to fetch all blogs
+// Obtener todos los blogs
 router.get('/blogs', async (req: Request, res: Response) => {
     try { 
         const blogs = await Blog.find(); 
@@ -13,6 +13,19 @@ router.get('/blogs', async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Error fetching blogs', error }); 
     }
 });
+
+// Obtener un blog específico
+/*router.get('/blogs/:id', async (req: Request, res: Response) => {
+    try {
+        const blog = await Blog.findById(req.params.id);
+        if (!blog) {
+            return res.status(404).json({ message: 'Blog no encontrado' });
+            }
+        return res.status(200).json(blog);
+    } catch (error) {
+        return res.status(500).json({ message: 'Error al obtener el blog', error });
+    }
+});*/
 
 //Crear unn blog
 router.post('/blogs', (req: Request, res: Response) => {

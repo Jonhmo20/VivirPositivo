@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext'; //importa el contexto de autenticacion
-
+import { Loader2, Send, Edit2, Trash2, MessageCircle, CheckCircle, XCircle  } from 'lucide-react';
 
 // Interfaces
 interface Question {
@@ -26,6 +26,7 @@ interface Response {
 
 
 const QASection: React.FC = () => {
+  //Estados existentes
   const [questions, setQuestions] = useState<Question[]>([]);
   const [newQuestion, setNewQuestion] = useState({ 
     name: '', 
@@ -39,37 +40,56 @@ const QASection: React.FC = () => {
   const [updatedQuestion, setUpdatedQuestion] = useState("");
   const [updatedResponseContent, setUpdatedResponseContent] = useState<string>(""); // Contenido actualizado de la respuesta
 
+  //Estados para UX mejorada
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  //const [isLoading, setIsLoading] = useState(false);
 
   //simulacion de autenticacion
   const { isAuthenticated } = useAuth(); //obtener el estado de autenticacion
 
    // Función para obtener ID consistente
-   const getQuestionId = (question: Question) => 
+   const getQuestionId = (question: Question)=> 
     typeof question._id === 'object' ? question._id.$oid : question._id;
+    
 
   
  
   // Cargar preguntas desde el servidor 
-  useEffect(() => { 
+  useEffect(()=> {
     const fetchQuestions = async () => { 
+      //setIsLoading(true);
       try { 
         const response = await axios.get('http://localhost:5000/api/questions'); 
         const processedQuestions = response.data.map((q: Question) => ({
           ...q,
-          id: getQuestionId(q)
+          id: getQuestionId(q),
         }));
         setQuestions(processedQuestions); 
       } catch (error) { 
         console.error('Error al cargar las preguntas:', error); 
-      } 
+        setSubmitError('Error al cargar las preguntas');
+        
+      }
     }; 
+
     
-    fetchQuestions(); 
-  }, []);
+      fetchQuestions(); 
+    }, []);
 
 
   const handleSubmitQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitSuccess(false);
+    
+    // Validación del correo electrónico
+    if (!newQuestion.email.trim() || !/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(newQuestion.email)) {
+      setSubmitError('Ingrese un correo válido');
+      setIsSubmitting(false);
+      return; // Detiene la ejecución si el correo es inválido
+  }
 
     try {
       const response = await axios.post(`http://localhost:5000/api/questions`, {
@@ -78,42 +98,62 @@ const QASection: React.FC = () => {
         question: newQuestion.question,
         category: newQuestion.category,
       }, {
-        // Add this to get more detailed error information
-        validateStatus: function (status) {
-          return status >= 200 && status < 300; // Default
-        }
- 
-      });
 
+        validateStatus: function (status) {
+          return status >= 200 && status < 300; 
+      }
+      });
+      
       if (response.status === 201) {
         const newQuestionWithId = {
-          ...response.data,
+          ...response.data,// La pregunta creada devuelta por el servidor
           id: typeof response.data._id === 'object' 
-            ? response.data._id.$oid 
-            : response.data._id
+          ? response.data._id.$oid 
+          : response.data._id,//resetea los campos de texto
         };
-        setQuestions([newQuestionWithId, ...questions]);
-        setNewQuestion({ name: '', email: '', question: '', category: '' });
-        alert('Pregunta enviada y guardada correctamente.');
+
+        // Agrega la nueva pregunta y limpia el formulario
+        setQuestions([newQuestionWithId, ...questions]);// Agrega la pregunta al final de la lista
+        setNewQuestion({ 
+          name: '', 
+          email: '', 
+          question: '', 
+          category: '' 
+        });
+      
+
+      // Marca el estado de éxito
+      //setIsSubmitting(false);
+      setSubmitSuccess(true);
+      setSubmitError('');
+
+      // Limpia los estados de éxito y error después de 3 segundos
+      setTimeout(() => {
+        setSubmitSuccess(false);
+        setSubmitError('');
+      }, 3000);
       } else {
         alert(`Error al guardar la pregunta: ${response.data.message || 'Unknown error'}`);
       }
+
     } catch (error) {
-      // More detailed error logging
       if (axios.isAxiosError(error)) {
-        console.error('Axios Error:', {
+        console.error('Axios error:', {
           message: error.message,
           response: error.response?.data,
-          status: error.response?.status
+          status: error.response?.status,
         });
         
-        alert(`Error en la conexión con el servidor: ${error.response?.data?.message || error.message}`);
+        setSubmitError(`Error en la conexión con el servidor: ${error.response?.data?.message || error.message}`);
       } else {
         console.error('Unexpected Error:', error);
-        alert(`Error inesperado al guardar la pregunta`);
-      }
+        setSubmitError(`Error inesperado al guardar la pregunta`);
+      } 
+    } finally {
+      setIsSubmitting(false);
     }
-};
+}; 
+        
 
   const handleResponseChange = (questionId: string, value: string) => {
       setResponseInputs((prev) => ({
@@ -178,6 +218,7 @@ const QASection: React.FC = () => {
 
   // Nuevas funciones de edición y eliminación
   const handleEditQuestion = async (questionId: string, updatedQuestion: string) => {
+    if (!questionId || !updatedQuestion) return;
     try {
       const response = await axios.put(`http://localhost:5000/api/questions/${questionId}`, {
         question: updatedQuestion
@@ -202,7 +243,7 @@ const QASection: React.FC = () => {
       const response = await axios.delete(`http://localhost:5000/api/questions/${questionId}`);
 
       if (response.status === 200) {
-        const updatedQuestions = questions.filter(q => q.id !== questionId);
+        const updatedQuestions = questions.filter(q =>  q.id !== questionId);
         setQuestions(updatedQuestions);
         alert('Pregunta eliminada correctamente');
       }
@@ -267,74 +308,140 @@ const QASection: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-8">
+      {/*{isLoading && (
+        <div className="flex items-center justify-center h-screen">
+          <Loader2 className="w-20 h-20 animate-spin" />
+        </div>
+      )}*/}
       {/* Formulario de Preguntas */}
-      <div className="bg-[#B7DBC8] rounded-xl shadow-lg transition-all hover:shadow-xl">
-        <div className="p-6">
-          <h2 className="text-2xl font-bold text-[#285D66] mb-6">
+
+     
+      <div className="bg-gradient-to-br from-[#7FC8A9]/10 to-[#4A90B6]/10 rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl border border-[#3BACA3]/20">
+        <div className="p-8">
+          <h2 className="text-3xl font-bold text-[#3BACA3] mb-6 flex items-center gap-3">
+            <MessageCircle className="w-8 h-8 " />
             ¿Tienes alguna pregunta?
           </h2>
-          <form onSubmit={handleSubmitQuestion} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <form onSubmit={handleSubmitQuestion} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                  Nombre (opcional)
+                </label>
               <input
                 type="text"
                 placeholder="Tu nombre (opcional)"
                 value={newQuestion.name}
                 onChange={(e) => setNewQuestion({...newQuestion, name: e.target.value})}
-                className="w-full px-4 py-3 rounded-lg bg-white border-2 border-[#6DA095] focus:outline-none focus:border-[#285D66] transition-colors"
-                required
+                className="w-full px-4 py-3 rounded-lg bg-white border border-[#4A90B6]/30 focus:outline-none focus:ring-2 focus:ring-[#3BACA3] focus:border-transparent transition-all"
+                aria-label='Tu nombre'
               />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  Correo electrónico
+                </label>
               <input
                 type="email"
-                placeholder="Tu correo electrónico"
+                placeholder="tu@email.com"
                 value={newQuestion.email}
                 onChange={(e) => setNewQuestion({...newQuestion, email: e.target.value})}
-                className="w-full px-4 py-3 rounded-lg bg-white border-2 border-[#6DA095] focus:outline-none focus:border-[#285D66] transition-colors"
+                className="w-full px-4 py-3 rounded-lg bg-white border border-[#4A90B6]/30 focus:outline-none focus:ring-2 focus:ring-[#3BACA3] focus:border-transparent transition-all"
                 required
+                aria-label='Tu correo electrónico'
               />
             </div>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+                Categoría
+                </label>
             <select
-            className="text-1xl px-1 py-1 font-bold text-[#285D66] mb-6 rounded-lg border-2 border-[#6DA095] focus:outline-none focus:border-[#285D66] transition-colors"
+            id="category"
+            className="w-full px-4 py-3 rounded-lg bg-white border border-[#4A90B6]/30 focus:outline-none focus:ring-2 focus:ring-[#3BACA3] focus:border-transparent transition-all text-[#3BACA3] font-semibold"
           value={newQuestion.category}
           onChange={(e) => setNewQuestion({...newQuestion, category: e.target.value})}
+          required
+          aria-label='Selecciona una categoría'
           
         >
           <option  value="">Selecciona una categoría</option>
           <option value="salud">Salud</option>
           <option value="psicología">Psicología</option>
         </select>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="question" className="block text-sm font-medium text-gray-700">
+                Tu Pregunta
+              </label>
             <textarea
               placeholder="Escribe tu pregunta aquí..."
               value={newQuestion.question}
-              onChange={(e) => setNewQuestion({...newQuestion, question: e.target.value})}
-              className="w-full px-4 py-3 rounded-lg bg-white border-2 border-[#6DA095] focus:outline-none focus:border-[#285D66] transition-colors min-h-[120px]"
+              onChange={(e) => 
+                setNewQuestion({...newQuestion, question: e.target.value})
+              }
+              className="w-full px-4 py-3 rounded-lg bg-white border border-[#4A90B6]/30 focus:outline-none focus:ring-2 focus:ring-[#3BACA3] focus:border-transparent transition-all min-h-[120px]"
               required
+              aria-label='Escribe tu pregunta aquí'
             />
+            </div>
+
             <button 
               type="submit"
-              className="w-full md:w-auto px-6 py-3 rounded-lg bg-[#285D66] hover:bg-[#6DA095] text-white font-semibold transition-colors duration-200 flex items-center justify-center gap-2"
+              disabled={isSubmitting}
+              className="w-full md:w-auto px-6 py-3 rounded-lg bg-[#3BACA3] hover:bg-[#4A90B6] text-white font-semibold transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50"
+              aria-label={isSubmitting ? 'Enviando pregunta...' : 'Enviar pregunta'}
             >
-              Enviar Pregunta
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
+              
+              {isSubmitting ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span>Enviar Pregunta</span>
+                  <Send className="w-5 h-5" />
+                </div>
+              )}
             </button>
+
+          {submitSuccess && (
+            <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-lg">
+              <CheckCircle className="w-5 h-5" />
+              Pregunta enviada con éxito
+              </div>
+          )}
+
+          {submitError && (
+            <div className="flex items-center gap-2 text-red-600 bg-red-50 p-3 rounded-lg">
+              <XCircle className="w-5 h-5" />
+              {submitError}
+            </div>
+          )}
+
           </form>
-        </div>
-      </div>
+          </div>
+          </div>
+    
 
       {/* Lista de Preguntas */}
       <div className="space-y-6">
-        <h3 className="text-xl font-semibold text-[#285D66] border-b-2 border-[#E1DF66] pb-2">
+        <h3 className="text-2xl font-bold text-[#3BACA3] border-b-2 border-[#7FC8A9] pb-2">
           Preguntas Recientes
         </h3>
         
-        {/* Verificación de tipo antes de usar map */}
+       {/* Verificación de tipo antes de usar map */}
         {questions.length > 0 ? (
-          questions.map((q) => (
+          <div className="space-y-6">
+          {questions.map((q) => (
           <div 
-          key={q.id} 
-          className="bg-white rounded-xl shadow-md hover:shadow-lg transition-all border-l-4 border-[#E1DF66]"
+          key={q.id}
+          className="bg-gradient-to-br from-[#7FC8A9]/10 to-[#4A90B6]/10 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border-l-4 border-[#4A90B6] overflow-hidden"
           >
+
+            
             <div className="p-6">
               <div className="flex justify-between items-start mb-4">
                 <div>
@@ -390,16 +497,17 @@ const QASection: React.FC = () => {
       {isAuthenticated && (
         <div className="flex gap-4 mt-4">
           <button
-            className="px-4 py-2 rounded-md bg-[#285D66] text-white hover:bg-[#6DA095] transition-colors"
+            className="px-4 py-2 rounded-md bg-[#285D66] text-white hover:bg-[#6DA095] transition-colors flex items-center gap-2"
             onClick={() => {
               setEditingQuestionId(q.id ?? null); //Activa modo de edicion
               setUpdatedQuestion(q.question); //Prellena el texto actual
             }}
           >
+            <Edit2 className="w-4 h-4" />
             Editar Pregunta
           </button>
           <button
-            className="px-4 py-2 rounded-md bg-red-500 text-white hover:bg-red-600 transition-colors"
+            className="px-4 py-2 rounded-md bg-red-500 text-white hover:bg-red-600 transition-colors flex items-center gap-2"
             onClick={() => {
               const confirmDelet = window.confirm("¿Estas seguro que deseas eliminar esta pregunta?");
               if (confirmDelet) {
@@ -407,9 +515,12 @@ const QASection: React.FC = () => {
             }
           }}
           >
+            <Trash2 className="w-4 h-4" />
             Eliminar Pregunta
           </button>
-        </div>
+          </div>
+      
+
       )}
 
               {/* Respuestas */}
@@ -420,7 +531,7 @@ const QASection: React.FC = () => {
             {q.responses.map((r) => (
               <li
                 key={r. _id}
-                className="bg-gray-50 p-4 rounded-lg shadow-md border-l-4 border-[#B7DBC8] "
+                className="bg-gradient-to-br from-[#7FC8A9]/5 to-[#4A90B6]/5 p-4 rounded-lg shadow-md border-l-4 border-[#B7DBC8]"
               >
                 {/* Logica de edicion o visualizacion */}
                 {editingResponseId === r._id ? (
@@ -469,6 +580,7 @@ const QASection: React.FC = () => {
                         setUpdatedResponseContent(r.content);
                       }}
                     >
+                      <Edit2 className="w-4 h-4" />
                       Editar
                     </button>
                     <button
@@ -478,10 +590,11 @@ const QASection: React.FC = () => {
                           "Estas seguro de que deseas eliminar esta respuesta?"
                         );
                         if (confirmDelet) {
-                        handleDeleteResponse(q. id!, r._id!);
+                        handleDeleteResponse(q.id!, r._id!);
                       }
                     }}
                     >
+                      <Trash2 className="w-4 h-4" />
                       Eliminar
                     </button>
                   </div>
@@ -496,7 +609,7 @@ const QASection: React.FC = () => {
 
               {/* Input de Respuesta solo si es admin*/}
               {isAuthenticated && (
-                <div className="mt-6 flex gap-2">
+                < div className="mt-6 flex gap-2">
                   <textarea
                     placeholder="Escribe una respuesta..."
                     value={responseInputs[typeof q._id === 'object' ? q._id.$oid : q._id]  || ''}// Usa el ID de la pregunta para acceder a su respuesta
@@ -507,26 +620,25 @@ const QASection: React.FC = () => {
                     className="flex-1 px-4 py-2 rounded-lg border-2 border-[#6DA095] focus:outline-none focus:border-[#285D66] transition-colors"
                   />
                   <button
-                    onClick={() => handleSubmitResponse(
-                      typeof q._id === 'object' ? q._id.$oid : q._id
-                    )}
+                    onClick={() => handleSubmitResponse(typeof q._id === 'object' ? q._id.$oid : q._id)}
                     className="px-4 py-2 rounded-lg bg-[#285D66] hover:bg-[#6DA095] text-white font-medium transition-colors duration-200"
                   >
                     Responder
                   </button>
-                </div>
-              )}
             </div>
+          )}
           </div>
-        ))
-      ):(
+          </div>
+          ))}
+          </div>
+      ) :(
 
           <p className="text-center py-8 text-gray-500">
             No hay preguntas aún. ¡Sé el primero en preguntar!
           </p>
         )}
       </div>
-    </div>
+      </div>
   );
 };
 

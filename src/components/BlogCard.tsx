@@ -4,16 +4,29 @@ import { useAuth } from "./AuthContext";
 import { useNavigate } from "react-router-dom";
 
 interface BlogCardProps {
+    blogId: number;
     title: string;
     description: string;
     image?: string;
     videoUrl?: string;
     author?: string;
     type: "text" | "video";
-    blogId?: number;
+    onEdit: (id: number) => void;
+    onDelete: (id: number) => void;
 }
 
-const Blogcard: React.FC<BlogCardProps> = ({ title, description, image, videoUrl, author, type, blogId }) => {
+const Blogcard: React.FC<BlogCardProps> = ({ 
+    title, 
+    description, 
+    image, 
+    videoUrl, 
+    author, 
+    type, 
+    blogId,
+    onEdit,
+    onDelete
+}) => {
+    const [isHovered, setIsHovered] = useState(false);
    const [showMore, setShowMore] = useState(false);
    const [shareMenuOpen, setShareMenuOpen] = useState(false);
    const [likes, setLikes] = useState(0);
@@ -48,13 +61,18 @@ const Blogcard: React.FC<BlogCardProps> = ({ title, description, image, videoUrl
         setUserAction("dislike");
     }
    };
+  
+   const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onEdit(blogId);
+  };
+  
 
-   const handleEdit = () => {
-    navigate(`/create-blog?blogId=${blogId}`);
-   };
-
-   const handleDelete = () => {
-    console.log("Eliminar blog con ID:", blogId);
+   const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm("¿Estás seguro de que quieres eliminar este blog?")) {
+        onDelete(blogId);
+    }
    };
 
       
@@ -93,69 +111,117 @@ const Blogcard: React.FC<BlogCardProps> = ({ title, description, image, videoUrl
     };
 
     return (
-        <div className="bg-white shadow-lg rounded-lg p-6 mb-4 relative transition transform hover:scale-105 hover:shadow-xl" >
-        <div className="flex justify-between items-start">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4 text-center">
-            {title}
-        </h2>
+
+        <div 
+        className={`relative goup w-full ${ showMore ? "h-auto" : "h-[500px]" } transition-all duration-300`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        >
+
+        
+        {/* Tarjetas traseras */}
+        <div className= "relative w-full h-full">
+        <div
+        className={`absolute top-0 left-0 w-[100%] h-[91%] bg-support/50  rounded-2xl shadow-lg  transition-all duration-300 ease-in-out transform-gpu ${
+          isHovered ? "-rotate-6 -translate-y-6 " : "rotate-0 translate-y-0 "
+        }`}
+        style={{ zIndex: 1}}
+      ></div>
+      <div
+        className={`absolute top-0 left-0 w-[90%] h-[91%] bg-secondary/40 rounded-2xl shadow-lg  transition-all duration-300 ease-in-out transform-gpu ${
+          isHovered ? "rotate-6 -translate-y-3" : "rotate-0 translate-y-0"
+        }`}
+        style={{ zIndex: 0}}
+      ></div>
+      
+        
+        {/* Tarjeta principal */}
+      <div className={`relative z-10 w-full h-full bg-white rounded-2xl shadow-xl p-6 transition-all duration-300 ease-in-out hover:scale-[1.02] ${ showMore ? "h-auto" : "h-[500px]"         
+      }`}>
+        <div className="flex flex-col h-full">
+        <div className="flex justify-between items-start mb-4">
+          <h2 className="text-2xl font-semibold text-primary hover:text-primary-hover">{title}</h2>
         {isAuthenticated && (
             <div className="absolute top-2 right-2 space-x-2">
                 <button 
                     onClick={handleEdit}
-                    className="text-gray-500 hover:text-gray-700">
+                    className="text-gray-500 hover:text-gray-700"
+                    aria-label="Editar blog"
+                    >
                     <FaEdit size={20} />
                 </button>
-                <button className="text-red-500 hover:text-red-700">
+                <button 
+                onClick={handleDelete}
+                className="text-red-500 hover:text-red-700"
+                aria-label="Eliminar blog"
+                >
                     <FaTrash size={20} />
                 </button>
                 </div>
         )}
         </div>
+    
 
         {/*imagen o video*/}
-        <div className="w-full mb-4 flex justify-center">
+        <div className="relative w-full mb-4 flex-shrink-0 flex justify-center overflow-hidden">
         {type === "text" && image && (
+            <div className="relative overflow-hidden rounded-lg">
                         <img 
                             src={image}    
                             alt="Blog preview"
-                            className="w-auto h-auto max-h-64 rounded-lg"
-                            style={{objectFit: "contain", maxWidth: "100%"}}
+                            className="w-full h-48 rounded-lg  object-contain transition-transform duration-300 hover:scale-110 hover:translate-y-[-10px] hover:shadow-xl"
+                            style={{ zIndex: 10 }}
                         />
+                        </div>
         )}
                  {type === "video" && (
-                <div className="w-full">
+                <div className="relative w-full h-48 overflow-hidden rounded-lg">
+                    <div
+                    className="transition-transform duration-300 hover:scale-110 hover:translate-y-[-10px] hover:shadow-xl"
+                     style={{ zIndex: 10 }}
+      >
                     {renderVideoEmbed()}
+                </div>
                 </div>
             )}   
             </div>                    
 
+            {/*Descripcion */}
+            <div 
+            className="flex-1 overflow-y-auto pr-2 scrollbar-thin  scrollbar-thumb-gray-300 scrollbar-track-transparent">
         <div className="text-left">
          {description && (
             <div 
                 className="text-gray-700 mb-4 " 
                 style={{whiteSpace: 'pre-wrap'}}
-                dangerouslySetInnerHTML={{ __html: showMore ? description : `${description.slice(0, 150)} ...` }}
+                dangerouslySetInnerHTML={{ 
+                    __html: showMore ? description : `${description.slice(0, 150)} ...` }}
             />
             )}    
 
          {/*ver mas*/}
          {description.length > 150 && (
             <button
-                className="text-blue-500 hover:text-blue-700 font-semibold"
+                className="text-blue-500 hover:text-blue-700 font-semibold mb-4"
                 onClick={() => setShowMore(!showMore)}
             >
                 {showMore ? "Ver menos" : "Ver mas"}
             </button>
          )}
         </div>
+        </div>
 
 
-
+         <div className="mt-auto pt-4 border-t flex-shrink-0">
+            <div className="flex justify-between items-center">
+                {/*autor*/}
          {author && (
-            <div className="flex justify-between items-center mt-4">
             <p className="text-gray-600 font-medium">
                 <strong>Autor:</strong> {author}
             </p>
+            )}
+
+            {/*botones de like y dislike*/}
             <div className="flex items-center space-x-4">
                 
                 <button 
@@ -173,23 +239,29 @@ const Blogcard: React.FC<BlogCardProps> = ({ title, description, image, videoUrl
                         <FaThumbsDown size={20} className="mr-1" />
                         {dislikes}
                         </button>
-                        </div>
-                        </div>
-         )}
-
-         <div className="flex justify-end mt-4">
-            <button className="text-gray-500 hover:text-green-500" onClick={() =>setShareMenuOpen(!shareMenuOpen)}>
+                        
+            <div className="relative">
+            <button 
+            className="text-gray-500 hover:text-green-500" 
+            onClick={() =>setShareMenuOpen(!shareMenuOpen)}>
                 <FaShareAlt size={20} />
             </button>
             {shareMenuOpen &&(
-                <div className="absolute right-4 mt-2 bg-white border rounded shadow-lg p-2">
-                    <button className="block w-full text-left p-1 hover:bg-gray-100">Facebook</button>
-                    <button className="block w-full text-left p-1 hover:bg-gray-100">Twitter</button>
-                    <button className="block w-full text-left p-1 hover:bg-gray-100">LinkedIn</button>
+                <div className="absolute right-0 bottom-full mb-2 bg-white border rounded-lg shadow-lg p-2 min-w-[120px]">
+                    <button className="block w-full text-left p-2 hover:bg-gray-100 rounded-md">Facebook</button>
+                    <button className="block w-full text-left p-2 hover:bg-gray-100 rounded-md">Twitter</button>
+                    <button className="block w-full text-left p-2 hover:bg-gray-100 rounded-md">LinkedIn</button>
                 </div>
             )}
          </div>
          </div>
+         </div>
+         </div>
+         </div>
+         </div>
+         </div>
+         </div>
+
     );
 };
 

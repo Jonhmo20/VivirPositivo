@@ -4,6 +4,7 @@ import ReactQuill from "react-quill";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from '../firebase'; 
 import Blogcard from "./BlogCard";
+import { blogService } from "./blogService";
 import "quill/dist/quill.snow.css";
 import '../index.css';
 
@@ -37,7 +38,32 @@ const BlogFormulario: React.FC<BlogFormularioProps> = ({addBlog}) => {
     const [image, setImage] = useState<File | null>(null); //cambia a tipo file para manejar la imagen
     const [imageURL, setImageURL] = useState<string>("")
 
-    
+      // Cargar datos del blog al editar
+  useEffect(() => {
+    const fetchBlog = async () => {
+      if (id) {
+        try {
+          const response = await fetch(`${API_URL}/blogs/${id}`);
+          if (!response.ok) {
+            throw new Error("Blog no encontrado");
+          }
+          const blog = await response.json();
+          setTitle(blog.title);
+          setDescription(blog.description || "");
+          setAuthor(blog.author || "");
+          setVideoUrl(blog.videoUrl || "");
+          setPostType(blog.type);
+          setImageURL(blog.image || "");
+        } catch (error) {
+          console.error("Error al cargar el blog:", error);
+          navigate('/');
+        }
+      }
+    };
+
+    fetchBlog();
+  }, [id, navigate]);
+
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
@@ -307,7 +333,7 @@ const BlogFormulario: React.FC<BlogFormularioProps> = ({addBlog}) => {
                         Vista Previa
                     </h2>
                     <div className="bg-white rounded-lg shadow-sm p-4"> <Blogcard
-                        blogId={id ? parseInt(id) : Date.now()}
+                        blogId={id ? parseInt(id) : undefined}
                         title={title}
                         description={description}
                         image={imageURL}
