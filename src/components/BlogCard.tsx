@@ -1,28 +1,27 @@
 import React, { useState } from "react";
 import { FaThumbsUp, FaThumbsDown, FaEdit, FaTrash, FaShareAlt } from "react-icons/fa";
 import { useAuth } from "./AuthContext";
-import { useNavigate } from "react-router-dom";
 
 interface BlogCardProps {
-    blogId: number;
+    _id: string;
     title: string;
     description: string;
     image?: string;
     videoUrl?: string;
     author?: string;
     type: "text" | "video";
-    onEdit: (id: number) => void;
-    onDelete: (id: number) => void;
+    onEdit: (id: string) => void;
+    onDelete: (id: string) => void;
 }
 
 const Blogcard: React.FC<BlogCardProps> = ({ 
+    _id,
     title, 
     description, 
     image, 
     videoUrl, 
     author, 
     type, 
-    blogId,
     onEdit,
     onDelete
 }) => {
@@ -34,7 +33,6 @@ const Blogcard: React.FC<BlogCardProps> = ({
    const [userAction, setUserAction] = useState<"like" | "dislike" | null>(null);
 
    const { isAuthenticated } = useAuth();
-   const navigate = useNavigate();
 
    const handleLike = () => {
     if (userAction === "like") {
@@ -62,16 +60,12 @@ const Blogcard: React.FC<BlogCardProps> = ({
     }
    };
   
-   const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onEdit(blogId);
-  };
+   const handleEdit = () => onEdit(_id);  
   
 
-   const handleDelete = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+   const handleDelete =  () => {
     if (window.confirm("¿Estás seguro de que quieres eliminar este blog?")) {
-        onDelete(blogId);
+        onDelete(_id);
     }
    };
 

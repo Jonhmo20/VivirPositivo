@@ -12,6 +12,16 @@ export const createBlog = async (req: Request, res: Response): Promise<Response>
     }
 };
 
+export const getBlogById = async (req: Request, res: Response): Promise<Response> => {
+    try {
+        const blog = await Blog.findById(req.params.id);
+        if (!blog) return res.status(404).json({message: 'Blog no encontrado'});
+        return res.json(blog);
+    } catch (error) {
+        return res.status(500).json({message: 'Error al obtener el blog', error});
+    }
+};
+
 //Editar blog
 export const updateBlog = async (req: Request, res: Response): Promise<Response> => {
     try {
@@ -26,9 +36,19 @@ export const updateBlog = async (req: Request, res: Response): Promise<Response>
 //Eliminar blog
 export const deleteBlog = async (req: Request, res: Response): Promise<Response> => {
     try {
-        const blog = await Blog.findByIdAndDelete(req.params.id);
-        if(!blog) return res.status(404).json({ message: 'Blog no encontrado'});
-        return res.json({ message: 'Blog eliminado'});
+        const blog = await Blog.findById(req.params.id);
+        if (!blog) {
+            return res.status(404).json({ message: 'Blog no encontrado'});
+            }
+
+        await Blog.findByIdAndDelete(req.params.id);
+        return res.json({ 
+            message: 'Blog eliminado exitosamente',
+            deleteBlog: {
+                id: blog._id,
+                title: blog.title
+            }
+            });
     } catch (error) {
         return res.status(500).json({ message: 'Error al eliminar el blog', error });
     }

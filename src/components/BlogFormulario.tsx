@@ -4,7 +4,6 @@ import ReactQuill from "react-quill";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from '../firebase'; 
 import Blogcard from "./BlogCard";
-import { blogService } from "./blogService";
 import "quill/dist/quill.snow.css";
 import '../index.css';
 
@@ -12,7 +11,7 @@ const API_URL = "http://localhost:5000/api"; // URL base del backend
 
 
 interface BlogPost {
-    id: number;
+    _id: string;
     title: string;
     description?: string;
     author?: string;
@@ -102,8 +101,7 @@ const BlogFormulario: React.FC<BlogFormularioProps> = ({addBlog}) => {
         }
 
 
-        const newBlog: BlogPost = {
-            id: id ? parseInt(id) : Date.now(),
+        const newBlog: Partial<BlogPost> = {
             title,
             description,
             author: postType === "text" ? author : undefined,
@@ -131,6 +129,7 @@ const BlogFormulario: React.FC<BlogFormularioProps> = ({addBlog}) => {
             if (response.ok) {
                 const createdBlog = await response.json();
                 addBlog(createdBlog);
+
                 navigate("/");
             } else {
         console.error("Error al guardar el blog");
@@ -332,14 +331,17 @@ const BlogFormulario: React.FC<BlogFormularioProps> = ({addBlog}) => {
                     <h2 className="text-2xl font-bold text-secondary mb-6">
                         Vista Previa
                     </h2>
-                    <div className="bg-white rounded-lg shadow-sm p-4"> <Blogcard
-                        blogId={id ? parseInt(id) : undefined}
+                    <div className="bg-white rounded-lg shadow-sm p-4"> 
+                        <Blogcard
+                        _id={id || "preview"}
                         title={title}
                         description={description}
                         image={imageURL}
                         videoUrl={videoUrl}
                         author={author}
                         type={postType}
+                        onEdit={() => {}}
+                        onDelete={() => {}}
                         
                         />
            
