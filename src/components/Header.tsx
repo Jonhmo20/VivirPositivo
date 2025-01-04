@@ -9,11 +9,12 @@ import {
   Bell,
   Moon,
   Sun,
-  LucideSquareSplitHorizontal
+  LucideSquareSplitHorizontal,
+  LucideIcon
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Define the props interface
 interface HeaderProps {
@@ -23,37 +24,15 @@ interface HeaderProps {
 
 
 // Define a type for possible navigation routes
-type NavigationRoute = 
-  | 'home' 
-  | 'preguntas' 
-  | 'admin-blogs';
+type NavigationRoute = 'home' | 'preguntas' | 'admin-blogs';
 
-// Define color palette type
-interface ColorPalette {
-  light: {
-    background: string;
-    primaryText: string;
-    secondaryText: string;
-    highlight: string;
-};
-  dark: {
-    background: string;
-    primaryText: string;
-    secondaryText: string;
-    highlight: string;
-  }
-};
 
 interface NavigationItem {
   route: NavigationRoute;
-  icon: React.ComponentType<{ size?: number; color?: string }>;
+  icon: LucideIcon
   label: string;
-  customAnimation?: {
-    hover?: object;
-    tap?: object;
-  };
-}
-
+  description?: string;
+  }
 
 
 const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
@@ -62,52 +41,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(false);
     const [pendingNotifications, setPendingNotifications] = useState(0);
-
-    const colors: ColorPalette = {
-      light: {
-        background: '#B7DBC8',
-        primaryText: '#285D66',
-        secondaryText: '#6DA095',
-        highlight: '#E1DF66'
-      },
-      dark: {
-        background: '#1E1E1E',
-        primaryText: '#E1DF66',
-        secondaryText: '#6DA095',
-        highlight: '#285D66'
-      }
-      
-     };
-
      
-
-
-    // Add mobileMenuVariants inside the component
-    const mobileMenuVariants = {
-      hidden: {
-        x: '100%',
-        opacity: 0,
-        transition: {
-          type: 'tween',
-          duration: 0.3
-        }
-      },
-      visible: {
-        x: 0,
-        opacity: 1,
-        transition: {
-          type: 'tween',
-          duration: 0.3
-        }
-      }
-    };
-
-     //toggle dark mode
-     const toggleDarkMode = () => {
-      const newMode = !isDarkMode;
-      setIsDarkMode(newMode);
-      localStorage.setItem('isDarkMode', JSON.stringify(newMode));
-     };
 
      //load dark mode from preferences
      useEffect(() => {
@@ -117,26 +51,29 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
       }
     }, []);
 
-    const currentColors = isDarkMode ? colors.dark : colors.light;
+    const navigationItems: NavigationItem[] = [
+      { 
+        route: 'home', 
+        icon: Home,
+        label: 'Inicio',
+        description: 'ir a la página de principal'
+      },
+      { 
+        route: 'preguntas', 
+        icon: MessageCircle,
+        label: 'Pregúntanos',
+        description: 'Accede a nuestra seccion de preguntas y respuestas'
+        }
+    ];
 
+    //toggle dark mode
+    const toggleDarkMode = () => {
+      const newMode = !isDarkMode;
+      setIsDarkMode(newMode);
+      localStorage.setItem('isDarkMode', JSON.stringify(newMode));
+     };
 
-  const handleLogoClick = () => {
-    navigate('/create-blog'); // Navega a la página de creación de blogs
-  };
-
-
-  const handleNavigation = (route: NavigationRoute) => {
-    console.log('Navegando a:', route); // Depuración
-    try {
-      onNavigate(route); // Llama a la función proporcionada desde las props
-    } catch (error) {
-      console.error('Error navigating to route:', error);
-    }
-  };
-   
-
-
-const handleLogout = () => {
+     const handleLogout = () => {
   const confirmLogout = window.confirm('¿Estás seguro de que deseas cerrar sesión?');
   if (confirmLogout) {
   logout();
@@ -144,314 +81,206 @@ const handleLogout = () => {
   }
 };
 
-// custom SVG Background pattern
-const BackgroundPattern: React.FC = () => {
-  return (
-  <svg
-      className='absolute inset-0 h-full w-full opacity-10'
-      xmlns="http://www.w3.org/2000/svg"
-      >
-        <defs>
-          <pattern
-            id="pattern"
-            width="100"
-            height="100"
-            patternUnits="userSpaceOnUse"
-            >
-            <circle
-              cx="50"
-              cy="50"
-              r="10"
-              fill={currentColors.secondaryText}
-              opacity="0.1"
-      />
-          </pattern>
-        </defs>
-        <rect
-          width="100%"
-          height="100%"
-          fill="url(#pattern)"
-          />
-      </svg>
-      );
-};
-
-const navigationItems: NavigationItem[] = [
-  { 
-    route: 'home', 
-    icon: (props) => <Home {...props} />,
-    label: 'Inicio',
-    customAnimation: {
-      hover: { rotate: 15 },
-      tap: { scale: 0.9 }
-    }
-  },
-  { 
-    route: 'preguntas', 
-    icon: (props) => <MessageCircle {...props} />,
-    label: 'Pregúntanos',
-    customAnimation: {
-      hover: { rotate: -15 },
-      tap: { scale: 0.9 }
-    }
-  }
-];
-
   return (
     <header 
-      className="relative w-full py-4 px-6 md:px-10 flex justify-between items-center shadow-lg z-50 transition-all duration-500"
-      style={{ 
-        backgroundColor: currentColors.background ,
-        borderBottom: `3px solid ${currentColors.highlight}`
-      }}
+      className="relative w-full bg-primary shadow-lg z-50 "
+      role="banner"
     >
-    <div className='absolute inset-0 overflow-hidden'>
-      <BackgroundPattern />
+    <div className='w-full px-4 sm:px-6 lg:px-8'>
+      <div className='flex items-center justify-between py-4'>
+        {/* Logo Section */}
+        <motion.div
+        whileHover={{ scale: 1.08, translateY: -2 }}
+        whileTap={{ scale: 0.96 }}
+        className='flex-shrink-0 mr-auto cursor-pointer'
+        onClick={() => navigate('/create-blog')}
+        >
+
+          <img 
+          src="/logo.jpeg"
+          alt="Logo de la plataforma medica edicativa"
+          className='h-12 w-24 
+               sm:h-16 sm:w-28 
+               md:h-20 md:w-32 
+               lg:h-20 lg:w-36 
+               xl:h-20 xl:w-40 
+               2xl:h-20 2xl:w-44 
+               rounded-lg shadow-[0_8px_16px_rgba(0,0,0,0.2)] hover:shadow-[0_12px_20px_rgba(0,0,0,0.25)] transition-shadow duration-300 object-cover'
+          />
+        </motion.div>
+
+        {/* Desktop Navigation Menu */}
+        <nav 
+        className="hidden md:flex items-center gap-x-4 ml-auto"
+        role='navigation'
+        aria-label='Navegación principal'
+        >
+          {navigationItems.map(({ route, icon: Icon, label, description }) => (
+            <motion.button
+              key={route}
+              onClick={() => onNavigate(route)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center px-4 py-2 rounded-md text-white hover:bg-primary-hover transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent"
+              aria-label={description || label}
+              >
+                 <Icon className="w-5 h-5 mr-2" />
+                <span className="font-medium">{label}</span>
+              </motion.button>
+            ))}
+
+            {/* Admin Actions */}
+            {isAuthenticated && (
+              <>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => onNavigate('admin-blogs')}
+                  className="flex items-center px-4 py-2 rounded-md text-white 
+                    hover:bg-primary-hover transition-colors duration-200
+                    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent"
+                  aria-label="Crear nuevo blog"
+                >
+                  <User className="w-5 h-5 mr-2" />
+                  <span className="font-medium">Crear Blogs</span>
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleLogout}
+                  className="flex items-center px-4 py-2 rounded-md text-white 
+                    hover:bg-primary-hover transition-colors duration-200
+                    focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent"
+                  aria-label="Cerrar sesión"
+                >
+                  <LogOut className="w-5 h-5 mr-2" />
+                  <span className="font-medium">Cerrar sesión</span>
+                </motion.button>
+              </>
+            )}
+          </nav>
+
+          {/* Utility Buttons */}
+          <div className="flex items-center ml-4">
+            {/* Dark Mode Toggle */}
+            {/*<motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={toggleDarkMode}
+              className="p-2 rounded-full hover:bg-primary-hover transition-colors duration-200
+                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-accent"
+              aria-label={isDarkMode ? 'Activar modo claro' : 'Activar modo oscuro'}
+            >
+              {isDarkMode ? (
+                <Sun className="w-5 h-5 text-white" />
+              ) : (
+                <Moon className="w-5 h-5 text-white" />
+              )}
+            </motion.button>
+
+            {/* Notifications */}
+            {/*{isAuthenticated && (
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="relative p-2 rounded-full hover:bg-primary-hover 
+                  transition-colors duration-200 focus:outline-none focus:ring-2 
+                  focus:ring-offset-2 focus:ring-accent"
+                aria-label={`Notificaciones: ${pendingNotifications} sin leer`}
+              >
+                <Bell className="w-5 h-5 text-white" />
+                {pendingNotifications > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-support text-white 
+                    text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                    {pendingNotifications}
+                  </span>
+                )}
+              </motion.button>
+            )}*/}
+
+            {/* Mobile Menu Button */}
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2 rounded-full hover:bg-primary-hover 
+                transition-colors duration-200 focus:outline-none focus:ring-2 
+                focus:ring-offset-2 focus:ring-accent"
+              aria-expanded={isMobileMenuOpen}
+              aria-label="Menú principal"
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-6 h-6 text-white" />
+              ) : (
+                <Menu className="w-6 h-6 text-white" />
+              )}
+            </motion.button>
+          </div>
+        </div>
       </div>
 
-      {/* Dark Mode Toggle */}
-      <motion.button 
-        onClick={toggleDarkMode}
-        aria-label={isDarkMode ? 'Cambiar al modo claro' : 'Cambiar al modo oscuro'}
-        className="absolute top-4 right-20 md:right-20 right-12 z-[110]"        
-        whileHover={{ rotate: 360, scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        >
-          {isDarkMode ? (
-            <Sun color={currentColors.primaryText} />
-          ) : (
-            <Moon color={currentColors.primaryText} />
-          )}
-          </motion.button>
-
-          {/* Notifications Badge */}
-          {isAuthenticated &&  (
-            <motion.div
-              className="absolute top-4 md:right-32 right-24 z-[110] flex items-center space-x-2" >
-
-                {/* Notifications Bell Icon */}
-                <motion.div
-                  className="relative cursor-pointer"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => {
-                    navigate('/create-blog'); // Navega a la página de creación de blogs
-                  }}
-                  >
-                  <Bell color={currentColors.primaryText} />
-                  {pendingNotifications > 0 && (
-                    <div
-                      className="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center rounded-full text-xs font-bold"
-                      style={{ 
-                        backgroundColor: currentColors.highlight,
-                        color: currentColors.primaryText
-                      }}
-                    >
-                    {pendingNotifications }
-                </div>
-          )}
-                </motion.div>
-
-                {/*<motion.div
-                  className=" cursor-pointer"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => {
-                    console.log('Switching layout view');
-                  }}
-                  >
-                  <LucideSquareSplitHorizontal color={currentColors.primaryText} />
-                </motion.div>*/}
-                </motion.div>
-          )}
-
-        {/*Sección del logotipo */}
-        <div className="flex items-center cursor-pointer" 
-        onClick={handleLogoClick}>
-        <img 
-        src="/logo.jpeg" 
-        alt="Logotipo" 
-        className="h-24 w-40 object-cover rounded-lg shadow-sm md:shadow-md lg:shadow-lg hover:shadow-xl transform transition-transform duration-300 hover:scale-110 
-        hover:scale-105 active:scale-95
-        hover:bg-opacity-50
-        transform"
-        style={{
-        maxWidth: '250px', // Límite de ancho máximo
-        borderRadius: '8px', // Bordes redondeados más pronunciados
-        border: '1px solid ${colors.primaryText}' // Borde con color de texto primario
-        }}
-        />
-        </div>               
-      
-
-      {/* Navigation Menu */}
-      <nav className="hidden md:flex items-center space-x-6 lg:space-x-10 ">
-        {navigationItems.map(({ route, icon: Icon, label }) => (
-          <div 
-            key={route}
-            onClick={() => handleNavigation(route as NavigationRoute)}
-            className="flex items-center space-x-3 px-4 py-2 rounded-md  transition-all duration-300 cursor-pointer
-            hover:scale-105 active:scale-95 
-            hover:bg-opacity-50 
-            transform"
-            style={{ 
-              color: currentColors.primaryText,
-              backgroundColor: `${currentColors.secondaryText}30`, // Fondo semi-transparente
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = currentColors.highlight} // Hover
-            
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor =  `${currentColors.secondaryText}30`} // Restaura a semi-transparente 
-            >
-            <Icon 
-            size={20} 
-            color={currentColors.primaryText} />
-            <span className="font-semibold text-base transition-colors duration-300">{label}</span>
-          </div>
-        ))}
-
-        {/* Admin Section - Only visible to admin */}
-        {isAuthenticated &&  (
-          <>
-          <div
-            onClick={() => handleNavigation('admin-blogs')}
-            className="flex items-center space-x-3 px-4 py-2 rounded-md transition-all duration-300 cursor-pointer
-            hover:scale-105 active:scale-95 
-            hover:bg-opacity-50 
-            transform"
-            style={{ 
-              color: currentColors.primaryText,
-              backgroundColor: `${currentColors.secondaryText}30`, // Fondo semi-transparente
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = currentColors.highlight} // Hover
-            
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor =  `${currentColors.secondaryText}30`} // Restaura a semi-transparente 
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden bg-primary-hover"
+            role="dialog"
+            aria-label="Menú móvil"
           >
-            <User size={20} />
-            <span className="font-semibold text-base">Crear Blogs</span>
-          </div>
+            <div className="px-4 pt-2 pb-3 space-y-1">
+              {navigationItems.map(({ route, icon: Icon, label }) => (
+                <motion.button
+                  key={route}
+                  onClick={() => {
+                    onNavigate(route);
+                    setIsMobileMenuOpen(false);
+                  }}
+                  whileHover={{ x: 10 }}
+                  className="flex items-center w-full px-4 py-2 text-white 
+                    hover:bg-primary transition-colors duration-200 rounded-md"
+                >
+                  <Icon size={20} className=" mr-2" />
+                  <span className="font-medium">{label}</span>
+                </motion.button>
+              ))}
 
-          <div 
-            onClick={handleLogout}
-            className="flex items-center space-x-3 px-4 py-2 rounded-md transition-all duration-300 cursor-pointer
-            hover:scale-105 active:scale-95 
-            hover:bg-opacity-50 
-            transform"
-            style={{ 
-              color: currentColors.primaryText,
-              backgroundColor: `${currentColors.secondaryText}30`, // Fondo semi-transparente
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = currentColors.highlight} // Hover
-            
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor =  `${currentColors.secondaryText}30`} // Restaura a semi-transparente 
-            >
-                <LogOut size={20} />
-                <span className="font-semibold text-base">Cerrar sesión</span>
-              </div>  
-              </>
-        )}
-        </nav>
-
-        {/* Mobile Menu toggle */}
-        <div
-          className="md:hidden fixed top-3 right-2 z-[110] cursor-pointer
-          hover:scale-105 active:scale-95
-          transform transition-transform duration-300"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            {isMobileMenuOpen ? (
-              <X size={32} color={currentColors.primaryText} />
-            ) : (
-              <Menu size={32} color={currentColors.primaryText} />
-            )}
-            </div>
-
-        {/* Mobile Menu */}
-          {isMobileMenuOpen && (
-            <motion.div
-            variants={mobileMenuVariants}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            className="fixed top-0 right-0 h-full w-64 bg-[#B7DBC8] shadow-2xl z-50 md:hidden tranform transition-transform duration-300"
-            >
-
-              <div className="flex flex-col h-full p-6 space-y-4 mt-16">
-                {navigationItems.map(({ route, icon: Icon, label, }) => (
-                  <div
-                    key={route}
+              {isAuthenticated && (
+                <>
+                  <motion.button
+                    whileHover={{ x: 10 }}
                     onClick={() => {
-                      handleNavigation(route as NavigationRoute);
-                      setIsMobileMenuOpen(false); // Cierra el menú al hacer clic
+                      onNavigate('admin-blogs');
+                      setIsMobileMenuOpen(false);
                     }}
-                    className="flex items-center space-x-3 px-4 py-3 rounded-md transition-all duration-300 cursor-pointer 
-                    hover:scale-105 active:scale-95 
-                    hover:bg-opacity-50 
-                    transform"
-                    style={{ 
-                      color: currentColors.primaryText,
-                      backgroundColor: `${currentColors.secondaryText}30`, // Fondo semi-transparente
+                    className="flex items-center w-full px-4 py-2 text-white 
+                      hover:bg-primary transition-colors duration-200 rounded-md"
+                  >
+                    <User className="w-5 h-5 mr-2" />
+                    <span className="font-medium">Crear Blogs</span>
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ x: 10 }}
+                    onClick={() => {
+                      handleLogout();
+                      setIsMobileMenuOpen(false);
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = currentColors.highlight} // Hover
-            
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor =  `${currentColors.secondaryText}30`} // Restaura a semi-transparente
-                    >
-                    <Icon size={24} />
-                    <span className="font-semibold text-base">{label}</span>
-                  </div>
-                  ))}
-
-                  {isAuthenticated &&  (
-                    <>
-                    <div 
-                      onClick={() => {
-                        handleNavigation('admin-blogs');
-                        setIsMobileMenuOpen(false);
-                      } }
-                      className="flex items-center space-x-3 px-4 py-3 rounded-md transition-all duration-300 cursor-pointer
-                      hover:scale-105 active:scale-95 
-                      hover:bg-opacity-50 
-                      transform"
-                      style={{ 
-                        color: currentColors.primaryText,
-                        backgroundColor: `${currentColors.secondaryText}30`, // Fondo semi-transparente
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = currentColors.highlight} // Hover
-            
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor =  `${currentColors.secondaryText}30`} // Restaura a semi-transparente
-                      
-                        >
-                          <User size={24} />
-                          <span className="font-semibold text-lg">Crear Blogs</span>
-                        </div>
-
-                        <div
-                          onClick={() => {
-                            handleLogout();
-                            setIsMobileMenuOpen(false)
-                          }}
-                          className="flex items-center space-x-3 px-4 py-3 rounded-md transition-all duration-300 cursor-pointer
-                          hover:scale-105 active:scale-95 
-                          hover:bg-opacity-50 
-                          transform"
-                          style={{ 
-                            color: currentColors.primaryText,
-                            backgroundColor: `${currentColors.secondaryText}30`, // Fondo semi-transparente
-                          }}
-                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = currentColors.highlight} // Hover
-            
-                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor =  `${currentColors.secondaryText}30`} // Restaura a semi-transparente
-                          
-                            >
-                              <LogOut size={24} />
-                              <span className="font-semibold text-lg">Cerrar sesión</span>
-                            </div>
-                    </>
-                  )}
-
-                </div>
-              </motion.div>
-            )}
-                  
+                    className="flex items-center w-full px-4 py-2 text-white 
+                      hover:bg-primary transition-colors duration-200 rounded-md"
+                  >
+                    <LogOut className="w-5 h-5 mr-2" />
+                    <span className="font-medium">Cerrar sesión</span>
+                  </motion.button>
+                </>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };
