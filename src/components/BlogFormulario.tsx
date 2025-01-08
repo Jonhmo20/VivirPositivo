@@ -36,6 +36,7 @@ const BlogFormulario: React.FC<BlogFormularioProps> = ({addBlog}) => {
     const [postType, setPostType] = useState<"text" | "video">("text");
     const [image, setImage] = useState<File | null>(null); //cambia a tipo file para manejar la imagen
     const [imageURL, setImageURL] = useState<string>("")
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
       // Cargar datos del blog al editar
   useEffect(() => {
@@ -90,6 +91,10 @@ const BlogFormulario: React.FC<BlogFormularioProps> = ({addBlog}) => {
     const handlesumit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        if (isSubmitting) return;
+        setIsSubmitting(true);
+
+        try {
         let uploadedImageURL = imageURL;
 
         if (image) {
@@ -127,13 +132,24 @@ const BlogFormulario: React.FC<BlogFormularioProps> = ({addBlog}) => {
                   });
 
             if (response.ok) {
-                const createdBlog = await response.json();
-                addBlog(createdBlog);
+                const savedBlog = await response.json();
 
+                //solo llama a addBlog si existe y estamos creando un nuevo blog
+                if (!id && addBlog) {
+                addBlog(savedBlog);
+                }
+
+                //Redirecciona al usuario a la página de blogs
                 navigate("/");
             } else {
-        console.error("Error al guardar el blog");
-    }
+                throw new Error("Error al guardar el blog");
+            }
+        } catch (error) {
+            console.error("Error :", error);
+            alert("Hubo un error al guardar el blog. Por favor, inténtalo de nuevo.");
+        } finally {
+            setIsSubmitting(false);
+        }
 };
 
 
