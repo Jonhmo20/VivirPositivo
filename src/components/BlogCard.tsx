@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { FaThumbsUp, FaThumbsDown, FaEdit, FaTrash, FaShareAlt } from "react-icons/fa";
+import { FaEdit, FaShareAlt } from "react-icons/fa";
+import { FaThumbsUp, FaThumbsDown, FaTrash, FaFacebookF, FaXTwitter, FaInstagram } from "react-icons/fa6";
 import { useAuth } from "./AuthContext";
 
 interface BlogCardProps {
@@ -33,6 +34,30 @@ const Blogcard: React.FC<BlogCardProps> = ({
    const [userAction, setUserAction] = useState<"like" | "dislike" | null>(null);
 
    const { isAuthenticated } = useAuth();
+
+   //funcion para compartir en twitter
+   const handleShareTwitter = () => {
+    const blogUrl = `${window.location.origin}/blog/${_id}`;
+    const shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(blogUrl)}`;
+    window.open(shareUrl, "_blank", "width=600,height=400");
+    setShareMenuOpen(false);
+   };
+
+   //funcion para compartir en facebook
+   const handleShareFacebook = () => {
+    const blogUrl = `${window.location.origin}/blog/${_id}`;
+    const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(blogUrl)}`;
+    window.open(shareUrl, "_blank", "width=600,height=400");
+    setShareMenuOpen(false);
+   };
+
+   //funcion para compartir en instagram
+   const handleShareInstagram = () => {
+    const blogUrl = `${window.location.origin}/blog/${_id}`;
+    const shareUrl = `https://www.instagram.com/share/url?u=${encodeURIComponent(blogUrl)}`;
+    window.open(shareUrl, "_blank", "width=600,height=400");
+    setShareMenuOpen(false);
+   };
 
    const handleLike = () => {
     if (userAction === "like") {
@@ -78,6 +103,7 @@ const Blogcard: React.FC<BlogCardProps> = ({
             : new URL(videoUrl).searchParams.get("v");
 
             return (
+                <div className="w-full h-[300px]">
                 <iframe
                 width="100%"
                 height="100%"
@@ -86,7 +112,8 @@ const Blogcard: React.FC<BlogCardProps> = ({
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
-                ></iframe>    
+                ></iframe> 
+                </div>   
             );
         } else if (videoUrl && videoUrl.includes("tiktok.com")) {
             return (
@@ -237,14 +264,30 @@ const Blogcard: React.FC<BlogCardProps> = ({
             <div className="relative">
             <button 
             className="text-gray-500 hover:text-green-500" 
-            onClick={() =>setShareMenuOpen(!shareMenuOpen)}>
+            onClick={() =>setShareMenuOpen(!shareMenuOpen)}
+            >
                 <FaShareAlt size={20} />
             </button>
             {shareMenuOpen &&(
-                <div className="absolute right-0 bottom-full mb-2 bg-white border rounded-lg shadow-lg p-2 min-w-[120px]">
-                    <button className="block w-full text-left p-2 hover:bg-gray-100 rounded-md">Facebook</button>
-                    <button className="block w-full text-left p-2 hover:bg-gray-100 rounded-md">Twitter</button>
-                    <button className="block w-full text-left p-2 hover:bg-gray-100 rounded-md">LinkedIn</button>
+                <div className="absolute right-0 bottom-full mb-2 bg-white border rounded-lg shadow-lg p-2 min-w-[150px]">
+                    <button 
+                    className="flex items-center w-full text-left p-2 hover:bg-gray-100 rounded-md text-blue-500 hover:text-blue-700"
+                    onClick={handleShareFacebook}
+                    >
+                        <FaFacebookF className="mr-2"/>Facebook
+                        </button>
+                        <button 
+                            className="flex items-center w-full text-left p-2 hover:bg-gray-100 rounded-md text-pink-600"
+                            onClick={handleShareInstagram}
+                        >
+                            <FaInstagram className="mr-2" /> Instagram
+                        </button>
+                        <button 
+                            className="flex items-center w-full text-left p-2 hover:bg-black/10 rounded-md text-black"
+                            onClick={handleShareTwitter}
+                        >
+                            <FaXTwitter className="mr-2" /> X
+                        </button>
                 </div>
             )}
          </div>
