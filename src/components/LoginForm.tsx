@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/ReactToastify.css';
-import { Lock, User } from "lucide-react";
+import { Lock, User, Eye, EyeOff } from "lucide-react";
 
 interface LoginFormProps {
     username: string;
@@ -18,25 +18,32 @@ const LoginForm: React.FC = () => {
 
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [isFormFocused, setIsFormFocused] = useState(false);
-
-    useEffect(() => {
-        setFormData({ username: '', password: ''});
-    }, []);
-    
     const [errors, setErrors] = useState<{username: string; password: string }>({
         username: '',
         password: ''
     });
 
     const navigate = useNavigate();
-    const { login } = useAuth();
+        const { login } = useAuth();
 
+    useEffect(() => {
+        setFormData({ username: '', password: ''});
+    }, []);
+    
+    
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setFormData({
-            ...formData,
+        setFormData(prev => ({
+            ...prev,
             [name]: value
-        });
+        }));
+        //Limpia los errores al escribir
+        if (errors[name as keyof typeof errors]) {
+            setErrors(prev => ({ 
+                ...prev, 
+                [name]: '' 
+            }));
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -75,7 +82,10 @@ const LoginForm: React.FC = () => {
                     login();
 
                     //Muestra mensaje de inicio de sesion exitoso
-                    toast.success('Inicio de sesion exitoso como administrador');
+                    toast.success('Inicio de sesion exitoso como administrador', {
+                        position: "top-right",
+                        autoClose: 1500
+                    });
 
                     //Navega a la pagina de destino despues de un corto retraso
                     setTimeout(() => {
@@ -95,32 +105,31 @@ const LoginForm: React.FC = () => {
 
     return (
         <div 
-        className="min-h-screen flex items-center justify-center bg-[#B7DBC8] p-4 transition-all duration-500 ease-in-out"
-        style={{
-            backgroundImage: `
-                linear-gradient(
-                    135deg, 
-                    rgba(40, 93, 102, 0.1), 
-                    rgba(109, 160, 149, 0.1)
-                )
-            `,
-        }}
+        className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-support to-accent p-4 "
+
+        //Fondo con gradiente mas suave y profesional
+        
     >
         <ToastContainer />
         
         <div 
             className={`
                 w-full max-w-md 
-                bg-[#285D66] 
+                bg-white 
                 rounded-2xl 
-                shadow-2xl 
+                shadow-xl 
                 overflow-hidden 
                 transform 
                 transition-all 
-                duration-700 
-                ${isFormFocused ? 'scale-105 shadow-lg' : 'scale-100'}
+                duration-500 
+                ${isFormFocused ? 'scale-[1.02] shadow-2xl' : 'scale-100'}
+                backdrop-blur-sm
+                relative
             `}
         >
+            {/* Elemento decorativo superior */}
+            <div className="absolute top-0 left-0 right-0 h-2  bg-primary rounded-t-2xl" ></div>
+            {/* Formulario de inicio de sesion */}
             <form 
                 onSubmit={handleSubmit}
                 className="p-8 space-y-6"
@@ -128,19 +137,22 @@ const LoginForm: React.FC = () => {
                 onFocus={() => setIsFormFocused(true)}
                 onBlur={() => setIsFormFocused(false)}
             >
+                {/* Encabezado del formulario */}
                 <div className="text-center mb-8">
-                    <h2 className="text-3xl font-bold text-[#E1DF66] tracking-wide uppercase">
+                    <h2 className="text-3xl font-bold text-primary tracking-wide ">
                         Iniciar Sesión
                     </h2>
-                    <p className="text-[#6DA095] mt-2 text-sm">
+                    <p className="text-secondary mt-2">
                         Accede a tu cuenta de administrador
                     </p>
                 </div>
 
+                {/* Campos del formulario */}
                 <div className="space-y-4">
+                    {/* Campo de usuario */}
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <User className="h-5 w-5 text-[#6DA095]" />
+                            <User className="h-5 w-5 text-primary" />
                         </div>
                         <input 
                             type="text"
@@ -148,33 +160,40 @@ const LoginForm: React.FC = () => {
                             value={formData.username}
                             onChange={handleInputChange}
                             placeholder="Nombre de usuario"
-                            className="
+                            aria-label="Nombre de usuario"
+                            className={`
                                 w-full 
                                 pl-10 
                                 pr-4 
                                 py-3 
                                 rounded-lg 
-                                bg-[#B7DBC8] 
-                                text-[#285D66] 
-                                placeholder-[#285D66]/50 
+                                border
+                                bg-neutral/50
+                                text-secondary 
+                                placeholder-secondary/50
                                 focus:outline-none 
                                 focus:ring-2 
-                                focus:ring-[#E1DF66]
+                                focus:ring-prymary/30
+                                focus:border-primary
                                 transition-all 
                                 duration-300
-                            "
+                                ${errors.username ? 'border-red-300' : 'border-secondary/20'}
+                            `}
                             autoComplete="off"
                         />
+
+                        {/*mensaje de error para usuario*/}
                         {errors.username && (
-                            <p className="text-red-300 text-xs mt-1 pl-3">
+                            <p className="text-red-500 text-sm mt-1 pl-3" role="alert">
                                 {errors.username}
                             </p>
                         )}
                     </div>
 
+                    {/* Campo de contraseña */}
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Lock className="h-5 w-5 text-[#6DA095]" />
+                            <Lock className="h-5 w-5 text-primary" />
                         </div>
                         <input
                             type={isPasswordVisible ? "text" : "password"}
@@ -182,96 +201,102 @@ const LoginForm: React.FC = () => {
                             value={formData.password}
                             onChange={handleInputChange}
                             placeholder="Contraseña"
-                            className="
+                            aria-label="Contraseña"
+                            className={`
                                 w-full 
                                 pl-10 
                                 pr-12 
                                 py-3 
                                 rounded-lg 
-                                bg-[#B7DBC8] 
-                                text-[#285D66] 
-                                placeholder-[#285D66]/50 
+                                border
+                                bg-neutral/50
+                                text-secondary 
+                                placeholder-secondary/50
                                 focus:outline-none 
                                 focus:ring-2 
-                                focus:ring-[#E1DF66]
+                                focus:ring-primary/30
+                                focus:border-primary
                                 transition-all 
                                 duration-300
-                            "
+                                ${errors.password ? 'border-red-300' : 'border-secondary/20'}
+                            `}
                             autoComplete="new-password"
                         />
+
+                        {/*boton para mostrar/ocultar contraseña*/}
                         <button
                             type="button"
                             onClick={() => setIsPasswordVisible(!isPasswordVisible)}
                             className="
                                 absolute 
-                                right-0 
+                                right-3
                                 inset-y-0 
                                 flex 
                                 items-center 
-                                pr-3 
-                                text-[#6DA095] 
-                                hover:text-[#E1DF66] 
+                                text-primary/60
+                                hover:text-primary
                                 transition-colors 
                                 duration-200
                             "
+                            aria-label={ isPasswordVisible ? "Ocultar contraseña" : "Mostrar contraseña"}
                         >
-                            {isPasswordVisible ? 
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                                    <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                                </svg>
-                                :
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414l14 14a1 1 0 001.414-1.414l-1.473-1.473A10.014 10.014 0 0019.542 10C18.268 5.943 14.478 3 10 3a9.958 9.958 0 00-4.512 1.074l-1.78-1.78zm4.261 4.262l1.514 1.514a2.003 2.003 0 012.45 2.45l1.514 1.514a4 4 0 00-5.478-5.478z" clipRule="evenodd" />
-                                    <path d="M12.454 16.697L9.75 13.992a4 4 0 01-3.742-3.742L2.335 6.578A9.98 9.98 0 00.458 10c1.274 4.057 5.064 7 9.542 7 .969 0 1.911-.134 2.803-.385z" />
-                                </svg>
-                            }
-                        </button>
-                        {errors.password && (
-                            <p className="text-red-300 text-xs mt-1 pl-3">
-                                {errors.password}
-                            </p>
-                        )}
-                    </div>
+                            {isPasswordVisible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                            </button>
+
+                            {/*mensaje de error para contraseña*/}
+                            {errors.password && (
+                                <p className="text-red-500 text-sm mt-1 pl-3" role="alert">
+                                    {errors.password}
+                                </p>
+                            )}
+                        </div>                        
                 </div>
 
+
+                {/* Boton de envio del formulario */}
                 <button
                     type="submit"
                     className="
                         w-full 
                         py-3 
-                        bg-[#E1DF66] 
-                        text-[#285D66] 
-                        font-bold 
+                        bg-primary 
+                        text-white
+                        font-semibold
                         rounded-lg 
-                        hover:bg-[#6DA095] 
-                        hover:text-white 
+                        hover:bg-primary-hover
+                        focus:ring-4 
+                        focus:ring-primary/30
                         transition-all 
                         duration-300 
                         transform 
-                        hover:scale-105 
-                        active:scale-95
-                        shadow-lg 
+                        hover:scale-[1.02] 
+                        active:scale-[0.98]
+                        shadow-lg
                         hover:shadow-xl
+                        disabled:opacity-50
+                        disabled:cursor-not-allowed
                     "
                 >
                     Iniciar Sesión
                 </button>
 
-                <div className="text-center">
+                {/* Boton de recuperación de contraseña */}
+                {/*<div className="text-center">
                     <a 
                         href="#" 
                         className="
-                            text-[#6DA095] 
+                            text-primary/80
                             text-sm 
-                            hover:text-[#E1DF66] 
+                            hover:text-primary
                             transition-colors 
                             duration-300
+                            focus:outline-none
+                            focus:underline
                         "
                     >
                         ¿Olvidaste tu contraseña?
                     </a>
-                </div>
+                </div>*/}
             </form>
         </div>
     </div>
