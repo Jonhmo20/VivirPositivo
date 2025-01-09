@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from './components/AuthContext';
 import BlogPage from './components/BlogPage';
 import QASection from './components/QaSection';
 import Header from './components/Header';
+import Footer from './components/Footer';
 import ErrorBoundary from './components/ErrorBoundary';
 
 interface Blog {
@@ -30,7 +31,9 @@ function App() {
     <Router>
       <AuthProvider>
         <ErrorBoundary >
+          <div className='flex flex-col min-h-screen'>
         <AppContent blogs={blogs} agregarBlog={agregarBlog} />
+        </div>
       </ErrorBoundary>
       </AuthProvider>
     </Router>
@@ -70,6 +73,8 @@ function AppContent({
         }} 
       />
       
+      {/* Contenido principal del sitio */}
+      <main className="flex-grow">
       <Routes>
         <Route path="/login" element={<LoginForm />} />
         <Route path="/" element={<BlogPage blogs={blogs} addBlog={agregarBlog} />} />
@@ -87,8 +92,14 @@ function AppContent({
           </PrivateRoute>   
          }
         />
+        {/* Nueva ruta para la politica de privacidad */}
+        <Route path="/politica-privacidad" element={<h1>Politica de privacidad</h1>} />
         <Route path='*' element={<h1>404 - Página no encontrada</h1>} />
       </Routes>
+      </main>
+
+      {/* Footer */}
+      <Footer />
     </>
   );
 }
