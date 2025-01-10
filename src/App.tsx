@@ -9,6 +9,7 @@ import QASection from './components/QaSection';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import PrivacyPolicy from './components/PrivacyPolicy';
+import TerminosUso from './components/TerminosUso';
 import ErrorBoundary from './components/ErrorBoundary';
 
 interface Blog {
@@ -94,6 +95,7 @@ function AppContent({
          }
         />
         {/* Nueva ruta para la politica de privacidad */}
+        <Route path="/terminos" element={<TerminosUso />} />
         <Route path="/privacidad" element={<PrivacyPolicy />} />
         <Route path='*' element={<h1>404 - Página no encontrada</h1>} />
       </Routes>

@@ -42,7 +42,7 @@ const Footer: React.FC<FooterProps> = ({ onNewsletterSignup }) => {
             title: "Legal",
             links: [
                 { label: "Política de privacidad", href: "/privacidad", external: true },
-                { label: "Terminos de uso", href: "/", external: true },
+                { label: "Terminos de uso", href: "/terminos", external: true },
                 { label: "Accesibilidad", href: "/", external: true },
             ]
         },
