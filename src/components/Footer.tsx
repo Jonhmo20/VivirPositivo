@@ -41,7 +41,7 @@ const Footer: React.FC<FooterProps> = ({ onNewsletterSignup }) => {
         {
             title: "Legal",
             links: [
-                { label: "Política de privacidad", href: "/", external: true },
+                { label: "Política de privacidad", href: "/privacidad", external: true },
                 { label: "Terminos de uso", href: "/", external: true },
                 { label: "Accesibilidad", href: "/", external: true },
             ]
@@ -166,11 +166,11 @@ const Footer: React.FC<FooterProps> = ({ onNewsletterSignup }) => {
 
         {/* Copyright y links finales */}
         <div className="border-t border-gray-200 dark:border-gray-700 mt-8 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-600 dark:text-gray-400 text-sm">
+          <div className="flex flex-col items-center text-center">
+            <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
               © {new Date().getFullYear()} VivirPosi+ivo. Todos los derechos reservados.
             </p>
-            <div className="flex space-x-4 mt-4 md:mt-0">
+            <div className="flex space-x-4 ">
               <a href="/privacidad" className="text-sm text-gray-600 dark:text-gray-400 hover:text-[#4A90B6] dark:hover:text-[#7FC8A9] transition-colors">
                 Privacidad
               </a>
