@@ -11,6 +11,7 @@ import Footer from './components/Footer';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TerminosUso from './components/TerminosUso';
 import ErrorBoundary from './components/ErrorBoundary';
+import Accessibility from './components/Accessibility';
 
 interface Blog {
   id: number;
@@ -95,6 +96,7 @@ function AppContent({
          }
         />
         {/* Nueva ruta para la politica de privacidad */}
+        <Route path="/acessibilidad" element={<Accessibility />} />
         <Route path="/terminos" element={<TerminosUso />} />
         <Route path="/privacidad" element={<PrivacyPolicy />} />
         <Route path='*' element={<h1>404 - Página no encontrada</h1>} />
