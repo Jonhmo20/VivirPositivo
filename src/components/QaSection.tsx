@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from './AuthContext'; //importa el contexto de autenticacion
 import { Loader2, Send, Edit2, Trash2, MessageCircle, CheckCircle, XCircle  } from 'lucide-react';
+import Background from './Background';
 
 // Interfaces
 interface Question {
@@ -307,6 +308,7 @@ const QASection: React.FC = () => {
   
 
   return (
+    <Background>
     <div className="max-w-4xl mx-auto p-4 space-y-8">
       {/*{isLoading && (
         <div className="flex items-center justify-center h-screen">
@@ -316,7 +318,7 @@ const QASection: React.FC = () => {
       {/* Formulario de Preguntas */}
 
      
-      <div className="bg-gradient-to-br from-[#7FC8A9]/10 to-[#4A90B6]/10 rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl border border-[#3BACA3]/20">
+      <div className="bg-gradient-to-br from-[#7FC8A9]/30 to-[#4A90B6]/30 rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl border border-[#3BACA3]/20">
         <div className="p-8">
           <h2 className="text-3xl font-bold text-[#3BACA3] mb-6 flex items-center gap-3">
             <MessageCircle className="w-8 h-8 " />
@@ -438,7 +440,7 @@ const QASection: React.FC = () => {
           {questions.map((q) => (
           <div 
           key={q.id}
-          className="bg-gradient-to-br from-[#7FC8A9]/10 to-[#4A90B6]/10 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border-l-4 border-[#4A90B6] overflow-hidden"
+          className="bg-gradient-to-br from-[#7FC8A9]/30 to-[#4A90B6]/30 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 border-l-4 border-[#4A90B6] overflow-hidden"
           >
 
             
@@ -639,6 +641,7 @@ const QASection: React.FC = () => {
         )}
       </div>
       </div>
+      </Background>
   );
 };
 

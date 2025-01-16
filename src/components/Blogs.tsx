@@ -1,5 +1,6 @@
 import React from "react";
 import Blogcard from "./BlogCard";
+import Background from "./Background";
 
 interface BlogPost {
   _id: string;
@@ -20,7 +21,7 @@ interface BlogProps {
 const Blogs: React.FC<BlogProps> = ({ blogs, onDelete, onEdit }) => {
 
     return (
-        <div className="w-full min-h-screen p-10 bg-cerceta-light">
+      <Background>
           <div className="px-4 py-12 bg-gradient-to-b from-teal-10 to-teal-50/30">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-4xl md:text-5xl font-bold text-center text-gray-800 mb-8 tracking-tight"> 
@@ -35,7 +36,7 @@ const Blogs: React.FC<BlogProps> = ({ blogs, onDelete, onEdit }) => {
             </p>
           </div>
         </div>
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16">
+           <div className="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16">
             {blogs.map((blog) => (
               <Blogcard
                 key={blog._id}
@@ -51,7 +52,7 @@ const Blogs: React.FC<BlogProps> = ({ blogs, onDelete, onEdit }) => {
                 />
             ))}
            </div>
-        </div>
+        </Background>
    );
 };
 

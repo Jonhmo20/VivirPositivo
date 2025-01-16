@@ -143,13 +143,13 @@ const Blogcard: React.FC<BlogCardProps> = ({
         {/* Tarjetas traseras */}
         <div className= "relative w-full h-full">
         <div
-        className={`absolute top-0 left-0 w-[100%] h-[91%] bg-support/50  rounded-2xl shadow-lg  transition-all duration-300 ease-in-out transform-gpu ${
+        className={`absolute top-0 left-0 w-[100%] h-[100%] bg-support/50  rounded-2xl shadow-lg  transition-all duration-300 ease-in-out transform-gpu ${
           isHovered ? "-rotate-6 -translate-y-6 " : "rotate-0 translate-y-0 "
         }`}
         style={{ zIndex: 1}}
       ></div>
       <div
-        className={`absolute top-0 left-0 w-[90%] h-[91%] bg-secondary/40 rounded-2xl shadow-lg  transition-all duration-300 ease-in-out transform-gpu ${
+        className={`absolute top-0 left-0 w-[100%] h-[100%] bg-secondary/40 rounded-2xl shadow-lg  transition-all duration-300 ease-in-out transform-gpu ${
           isHovered ? "rotate-6 -translate-y-3" : "rotate-0 translate-y-0"
         }`}
         style={{ zIndex: 0}}
@@ -157,7 +157,7 @@ const Blogcard: React.FC<BlogCardProps> = ({
       
         
         {/* Tarjeta principal */}
-      <div className={`relative z-10 w-full h-full bg-white rounded-2xl shadow-xl p-6 transition-all duration-300 ease-in-out hover:scale-[1.02] ${ showMore ? "h-auto" : "h-[500px]"         
+      <div className={`relative z-10 w-full h-full bg-white/50 rounded-2xl shadow-xl p-6 transition-all duration-300 ease-in-out hover:scale-[1.02] ${ showMore ? "h-auto" : "h-[500px]"         
       }`}>
         <div className="flex flex-col h-full">
         <div className="flex justify-between items-start mb-4">

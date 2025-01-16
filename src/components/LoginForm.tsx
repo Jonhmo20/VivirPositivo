@@ -4,6 +4,7 @@ import { useAuth } from "./AuthContext";
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/ReactToastify.css';
 import { Lock, User, Eye, EyeOff } from "lucide-react";
+import Background from "./Background";
 
 interface LoginFormProps {
     username: string;
@@ -104,8 +105,9 @@ const LoginForm: React.FC = () => {
             
 
     return (
+        <Background>
         <div 
-        className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-support to-accent p-4 "
+        className="min-h-screen flex items-center justify-center bg-gradient-to-b from-teal-10 to-teal-50/30"
 
         //Fondo con gradiente mas suave y profesional
         
@@ -115,7 +117,7 @@ const LoginForm: React.FC = () => {
         <div 
             className={`
                 w-full max-w-md 
-                bg-white 
+                bg-white/10
                 rounded-2xl 
                 shadow-xl 
                 overflow-hidden 
@@ -300,6 +302,7 @@ const LoginForm: React.FC = () => {
             </form>
         </div>
     </div>
+                    </Background>
 );
 };
 
