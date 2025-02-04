@@ -28,6 +28,7 @@ const Footer: React.FC<FooterProps> = ({ onNewsletterSignup }) => {
             links: [
                 { label: "Inicio", href: "/", external: true },
                 { label: "Preguntanos", href: "/QAsection", external: true },
+                { label: "Assistant", href: "/owlassistant", external: true },
             ]
         },
         {

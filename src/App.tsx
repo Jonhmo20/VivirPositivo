@@ -12,6 +12,8 @@ import PrivacyPolicy from './components/PrivacyPolicy';
 import TerminosUso from './components/TerminosUso';
 import ErrorBoundary from './components/ErrorBoundary';
 import Accessibility from './components/Accessibility';
+import OwlAssistant from './components/OwlAssistant';
+import AboutUs from './components/AboutUs';
 
 interface Blog {
   id: number;
@@ -72,6 +74,10 @@ function AppContent({
               break;
             default:
               navigate('/');//ruta por defecto
+              break;
+              case 'about-us':
+                navigate('/about-us');//ruta de sobre nosotros
+                break;
           }
         }} 
       />
@@ -80,6 +86,7 @@ function AppContent({
       <main className="flex-grow">
       <Routes>
         <Route path="/login" element={<LoginForm />} />
+        <Route path="/about-us" element={<AboutUs />} />
         <Route path="/" element={<BlogPage blogs={blogs} addBlog={agregarBlog} />} />
         <Route path='/QAsection' element={<QASection />} />
         <Route path="/create-blog" element={
@@ -105,7 +112,10 @@ function AppContent({
 
       {/* Footer */}
       <Footer />
-    </>
+
+      {/*Owl Assistant */}
+      <OwlAssistant />
+      </>
   );
 }
 

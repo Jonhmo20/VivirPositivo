@@ -10,6 +10,7 @@ import {
   Moon,
   Sun,
   LucideSquareSplitHorizontal,
+  Users,
   LucideIcon
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -24,7 +25,7 @@ interface HeaderProps {
 
 
 // Define a type for possible navigation routes
-type NavigationRoute = 'home' | 'preguntas' | 'admin-blogs';
+type NavigationRoute = 'home' | 'preguntas' | 'admin-blogs' | 'about-us';
 
 
 interface NavigationItem {
@@ -63,6 +64,12 @@ const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
         icon: MessageCircle,
         label: 'Pregúntanos',
         description: 'Accede a nuestra seccion de preguntas y respuestas'
+        },
+        {
+          route: 'about-us',
+          icon: Users,
+          label: 'Sobre nosotros',
+          description: 'Conoce mas sobre nuestra mision y visión'
         }
     ];
 

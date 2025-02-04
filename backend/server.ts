@@ -6,6 +6,7 @@ import authRoutes from './routes/auth';
 import blogRoutes from './routes/blogs';
 import uploadRoutes from "./routes/upload"; 
 import questionRoutes from './routes/questionRoutes';
+import chatRoutes from './routes/chatRoutes';
 
 // Cargar variables de entorno 
 dotenv.config();
@@ -31,7 +32,9 @@ app.use('/api/auth', authRoutes); //Ruta de autenticacion
 app.use('/api', blogRoutes);      //Ruta para los blogs
 app.use("/api", uploadRoutes);//Ruta subida de imagenes
 app.use('/api/questions', questionRoutes);//Ruta para crear pregunta
+app.use('/api/chat', chatRoutes);//Ruta para chat
 console.log('Rutas registradas:', app._router.stack);
+
 
 
 // Middleware de manejo de errores
